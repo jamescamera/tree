@@ -71,6 +71,7 @@ h1 span{color:var(--coral)}
 .card .name{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:14.5px;line-height:1.15;display:block}
 .card .title{display:block;color:var(--coral);font-size:9.5px;font-family:'IBM Plex Mono',monospace;letter-spacing:.08em}
 .card .desc{font-size:11px;color:var(--grape-soft);line-height:1.25;margin-top:2px}
+.card .code{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;color:var(--lilac-deep);margin-top:2px}
 .card.dim{opacity:.16}
 .card.hit{border-color:var(--coral);box-shadow:0 6px 0 -2px var(--coral)}
 .card.root{background:var(--marigold);border-width:3px;max-width:340px}
@@ -144,6 +145,36 @@ body.locked .gate{display:flex}
 .decode dt{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:var(--coral);font-weight:400}
 .decode dd{margin:3px 0 0;font-size:13px;color:var(--grape-soft);line-height:1.4}
 .decode dd b{color:var(--grape)}
+/* photos */
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:9px}
+.shots button{padding:0;border:3px solid var(--grape);border-radius:16px;overflow:hidden;cursor:pointer;background:var(--milk);aspect-ratio:1;transition:transform .16s cubic-bezier(.34,1.56,.64,1),box-shadow .16s ease}
+.shots button:hover{transform:translateY(-3px) rotate(-1deg);box-shadow:0 8px 0 -2px var(--lilac-deep)}
+.shots img{width:100%;height:100%;object-fit:cover;display:block}
+#lightbox{position:fixed;inset:0;z-index:90;background:rgba(51,32,73,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px}
+#lightbox[hidden]{display:none}
+#lightbox img{max-width:min(96vw,900px);max-height:78vh;border-radius:18px;border:3px solid var(--milk)}
+#lightbox p{margin:0;color:var(--milk);font-size:14px;text-align:center;max-width:46ch}
+#lbclose{position:absolute;top:14px;right:16px;background:var(--milk);border:2px solid var(--grape);border-radius:99px;width:40px;height:40px;font-size:16px;cursor:pointer;color:var(--grape)}
+
+/* drawn tree */
+.mapwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:rgba(255,252,244,.5);border:2px dotted var(--lilac-deep);border-radius:18px;padding:10px}
+#mapsvg>svg{display:block;min-width:1040px;width:100%;height:auto}
+.lk{fill:none;stroke:var(--lilac-deep);stroke-width:2.5}
+.tn{cursor:pointer}
+.tn rect{fill:var(--milk);stroke:var(--grape);stroke-width:2}
+.tn .nm{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:11.5px;fill:var(--grape)}
+.tn .dc{font-family:'Archivo',sans-serif;font-size:9.5px;fill:var(--grape-soft)}
+.tn .ti{font-family:'IBM Plex Mono',monospace;font-size:8px;fill:var(--coral);letter-spacing:.06em}
+.tn.root rect{fill:var(--marigold);stroke-width:3}
+#map .tn{opacity:0}
+#map.go .tn{opacity:1;transition:opacity .4s ease}
+#map .lk{opacity:0}
+#map.go .lk{opacity:1;transition:opacity .5s ease}
+#map.picked .tn{opacity:.2}
+#map.picked .tn.lit{opacity:1}
+#map.picked .tn.lit rect{stroke:var(--coral);stroke-width:3}
+#map.picked .lk{opacity:.12}
+#map.picked .lk.lit{opacity:1;stroke:var(--coral)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
 .stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
 .stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
@@ -201,7 +232,20 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
   <div class="controls" id="legend" style="margin:0;gap:6px"></div>
 </div>
 
+<section id="photos">
+  <p class="log-h" style="margin:26px 0 8px">The boy himself</p>
+  <div class="shots" id="shots"></div>
+</section>
+
 <nav class="nav" id="nav"></nav>
+
+<section class="gen" id="map">
+  <div class="gen-head"><h2>The whole tree, drawn out</h2>
+    <button class="pill" id="replay">↻ Draw it again</button></div>
+  <p class="gen-note">Yoshi on the left, five generations reaching back to the right. Tap any cat to
+    light up the line that leads to him.</p>
+  <div class="mapwrap"><div id="mapsvg"></div></div>
+</section>
 
 <div id="tree"></div>
 
@@ -255,6 +299,8 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 <footer>Health log transcribed from his Icknield Vet Clinic vaccination card. Pedigree transcribed from Yoshi's pedigree certificate. Coat colours come from the EMS codes on the document — bi-colours get a white bib, torties get a patch down one side, and Windymeadow Fleetwood Mac gets his tabby stripes. Names in coral carry championship titles, exactly as printed in red on the original.</footer>
 </div>
 
+<div id="lightbox" hidden><button id="lbclose" aria-label="Close">✕</button><img id="lbimg" alt=""><p id="lbcap"></p></div>
+
 <div id="bubble" role="status" aria-live="polite"></div>
 
 <script>
@@ -295,8 +341,34 @@ const T=Object.assign(n("Yoshi Cormac Babaganoush","BRI c 03","Lilac and white b
     dam:n("Grace Dominica Leven Dee","BLH p 03","Fawn and white, longhair",["fawn","white"])})})})
 });
 
+/* ---------- turning the codes into words ----------
+   So a card reads "British Shorthair, lilac, with white patches" instead of
+   making you go and look up BRI c 03. Codes we don't recognise (the UK
+   numbers on his mum's side) fall back to the written description. */
+const COLOUR={a:"blue",b:"chocolate",c:"lilac",d:"red",e:"cream",f:"black tortie",
+ g:"blue-cream",h:"chocolate tortie",j:"lilac tortie",n:"black",o:"cinnamon",
+ p:"fawn",q:"cinnamon tortie",r:"fawn tortie",s:"silver",w:"white"};
+const WHITE={"01":"almost entirely white","02":"mostly white","03":"with white patches","09":"with a little white"};
+const EYES={"61":"blue eyes","62":"orange eyes","63":"odd eyes","64":"green eyes"};
+const TABBYC={"21":"tabby","22":"classic tabby","23":"mackerel tabby","24":"spotted tabby","25":"ticked tabby"};
+const BREEDS={BRI:"British Shorthair",BSH:"British Shorthair",BLH:"British Longhair"};
+function plain(code){
+  const bits=[];
+  for(const raw of String(code).trim().split(/\s+/)){
+    const k=raw.replace(/[()]/g,"");
+    if(BREEDS[k.toUpperCase()]){bits.push(BREEDS[k.toUpperCase()]);continue}
+    if(k.length===1&&COLOUR[k.toLowerCase()]){bits.push(COLOUR[k.toLowerCase()]);continue}
+    if(WHITE[k]){bits.push(WHITE[k]);continue}
+    if(EYES[k]){bits.push(EYES[k]);continue}
+    if(TABBYC[k]){bits.push(TABBYC[k]);continue}
+  }
+  return bits.length?bits.join(", "):null;
+}
+const says=node=>plain(node.code)||node.desc;
+
 /* ---------- cat face ---------- */
 let uid=0;
+function faceInner(node){return face(node).replace(/^<svg[^>]*>/,"").replace(/<\/svg>$/,"");}
 function face(node){
   const id="c"+(uid++);
   const solid=node.cols.filter(c=>c!=="white");
@@ -347,7 +419,8 @@ function card(entry,gen){
   b.type="button";b.className="card"+(gen?"":" root");b.dataset.cols=node.cols.join(" ");
   b.innerHTML=face(node)+`<div><span class="rel">${rel}</span>
     <span class="name">${node.title?`<span class="title">${node.title}</span>`:""}${node.name}</span>
-    <div class="desc">${node.desc} · ${node.code}</div></div>`;
+    <div class="desc">${says(node)}</div>
+    <div class="code">${node.code}</div></div>`;
   b.addEventListener("click",()=>meet(b,node,rel));
   all.push({node,el:b,rel});
   return b;
@@ -371,11 +444,11 @@ GENS.forEach((g,gen)=>{
 
 /* nav */
 const nav=document.getElementById("nav");
-nav.innerHTML=GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a><a href="#decoder">📖 Decoder</a>`;
+nav.innerHTML=`<a href="#map">🌳 The tree</a>`+GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a><a href="#decoder">📖 Decoder</a>`;
 const links=[...nav.querySelectorAll("a")];
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)
   links.forEach(l=>l.classList.toggle("on",l.getAttribute("href")==="#"+e.target.id));});},{rootMargin:"-20% 0px -70%"});
-GENS.forEach(g=>io.observe(document.getElementById(g.id)));io.observe(document.getElementById("health"));io.observe(document.getElementById("decoder"));
+GENS.forEach(g=>io.observe(document.getElementById(g.id)));["map","health","decoder"].forEach(id=>io.observe(document.getElementById(id)));
 
 /* colour trace */
 let filter=null;
@@ -406,7 +479,7 @@ function mrrp(seed){
 function say(html){bubble.innerHTML=html;bubble.classList.add("show");clearTimeout(bt);bt=setTimeout(()=>bubble.classList.remove("show"),5200);}
 function meet(el,node,rel){
   el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");mrrp(node.name.length);
-  bubble.innerHTML=`<b>${node.name}</b> — ${rel==="The boy himself"?"that's you, mate":"Yoshi's "+rel.replace(" · "," on his ")}. ${node.desc}. Registered as <b>${node.code}</b>.${node.title?` Carries the title ${node.title}.`:""}`;
+  bubble.innerHTML=`<b>${node.name}</b> — ${rel==="The boy himself"?"that's you, mate":"Yoshi's "+rel.replace(" · "," on his ")}. ${says(node)}. Written on the pedigree as <b>${node.code}</b>.${node.title?` Carries the title ${node.title}.`:""}`;
   bubble.classList.add("show");clearTimeout(bt);bt=setTimeout(()=>bubble.classList.remove("show"),5200);
 }
 document.getElementById("lucky").onclick=()=>{
@@ -602,6 +675,113 @@ document.getElementById("copyout").onclick=()=>{
     .then(()=>say("Copied — paste it to Claude, or into the <b>LOG</b> list in index.html."))
     .catch(()=>{prompt("Copy this into the LOG list in index.html:",txt);});
 };
+
+/* ---------------- photos ---------------- */
+const SHOTS=[
+ ["yoshi-portrait","Up on the cat tree, giving the full orange-eyed stare."],
+ ["yoshi-capsule","Wedged into the bubble pod, watching the room go by."],
+ ["yoshi-garden","Out in the sun on the garden wall."],
+ ["yoshi-paw-up","Flat out, one paw up, not a care."],
+ ["yoshi-asleep","Asleep on the floor with his chin down."],
+ ["yoshi-rug","On the rug, looking up to see what you want."]
+];
+document.getElementById("shots").innerHTML=SHOTS.map(([f,cap],i)=>
+  `<button type="button" data-i="${i}" aria-label="${cap}">
+     <img src="photos/${f}-thumb.jpg" alt="${cap}" loading="lazy" width="520" height="520"></button>`).join("");
+const lb=document.getElementById("lightbox"),lbimg=document.getElementById("lbimg"),lbcap=document.getElementById("lbcap");
+function openShot(i){const[f,cap]=SHOTS[i];lbimg.src=`photos/${f}.jpg`;lbimg.alt=cap;lbcap.textContent=cap;
+  lb.hidden=false;document.getElementById("lbclose").focus();}
+document.getElementById("shots").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(b)openShot(+b.dataset.i);});
+const closeShot=()=>{lb.hidden=true;lbimg.src="";};
+document.getElementById("lbclose").onclick=closeShot;
+lb.addEventListener("click",e=>{if(e.target===lb)closeShot()});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!lb.hidden)closeShot()});
+
+/* ---------------- the drawn tree ----------------
+   Yoshi at the left, ancestors fanning out to the right. The sixteen cats in
+   the last generation get an even row each; everyone else sits midway between
+   the two parents they came from, which is what keeps the lines from crossing. */
+const COLW=208,NW=180,NH=62,ROWH=68;
+const tnodes=[];let leafY=0;
+(function place(node,gen,parent){
+  const x=gen*COLW;let y;
+  const me={node,gen,x,y:0,parent,links:[]};
+  if(node.sire){
+    const a=place(node.sire,gen+1,me),b=place(node.dam,gen+1,me);
+    y=(a.y+b.y)/2;me.kids=[a,b];
+  }else{y=(leafY++)*ROWH;me.kids=[];}
+  me.y=y;tnodes.push(me);return me;
+})(T,0,null);
+const MAPW=COLW*4+NW+4, MAPH=leafY*ROWH+6;
+
+function wrap(name,max){
+  const words=name.split(" ");const out=[];let line="";
+  for(const w of words){
+    if((line+" "+w).trim().length<=max){line=(line+" "+w).trim();}
+    else{if(line)out.push(line);line=w;}
+    if(out.length===2)break;
+  }
+  if(line&&out.length<2)out.push(line);
+  if(out.length===2&&out.join(" ").length<name.length)out[1]=out[1].slice(0,max-1)+"…";
+  return out;
+}
+const edges=[],nodeMarkup=[];
+tnodes.forEach((n,i)=>{n.i=i;});
+tnodes.forEach(n=>{
+  n.kids.forEach(k=>{
+    const x1=n.x+NW,y1=n.y+NH/2,x2=k.x,y2=k.y+NH/2,mid=x1+(x2-x1)/2;
+    edges.push(`<path class="lk" data-from="${n.i}" data-to="${k.i}" d="M${x1} ${y1} H${mid} V${y2} H${x2}"/>`);
+  });
+  const lines=wrap(n.node.name,20);
+  const face=faceInner(n.node);
+  nodeMarkup.push(`<g class="tn${n.gen?"":" root"}" data-i="${n.i}" transform="translate(${n.x},${n.y})" tabindex="0" role="button">
+    <title>${n.node.name}</title>
+    <rect width="${NW}" height="${NH}" rx="13"/>
+    <svg x="7" y="7" width="40" height="40" viewBox="0 0 100 100">${face}</svg>
+    ${n.node.title?`<text class="ti" x="53" y="14">${n.node.title}</text>`:""}
+    ${lines.map((l,i)=>`<text class="nm" x="53" y="${(n.node.title?26:21)+i*13}">${l}</text>`).join("")}
+    <text class="dc" x="53" y="${NH-8}">${n.node.code}</text></g>`);
+});
+document.getElementById("mapsvg").innerHTML=
+  `<svg viewBox="0 0 ${MAPW} ${MAPH}" role="img" aria-label="Yoshi's family tree, 31 cats over five generations">
+     <g>${edges.join("")}</g><g>${nodeMarkup.join("")}</g></svg>`;
+
+/* stagger the reveal by generation so it draws itself back through time */
+const mapEl=document.getElementById("map");
+mapEl.querySelectorAll(".tn").forEach(g=>{
+  g.style.transitionDelay=(tnodes[+g.dataset.i].gen*260)+"ms";});
+mapEl.querySelectorAll(".lk").forEach(pth=>{
+  pth.style.transitionDelay=(tnodes[+pth.dataset.from].gen*260+130)+"ms";});
+const draw=()=>{mapEl.classList.remove("go");void mapEl.offsetWidth;mapEl.classList.add("go");};
+new IntersectionObserver((es,ob)=>{es.forEach(e=>{if(e.isIntersecting){draw();ob.disconnect();}});},
+  {threshold:.12}).observe(mapEl);
+document.getElementById("replay").onclick=()=>{mapEl.classList.remove("picked");
+  mapEl.querySelectorAll(".lit").forEach(x=>x.classList.remove("lit"));draw();};
+
+/* tap a cat: light the line back to Yoshi */
+let picked=null;
+function pick(i){
+  if(picked===i){mapEl.classList.remove("picked");
+    mapEl.querySelectorAll(".lit").forEach(x=>x.classList.remove("lit"));picked=null;return;}
+  picked=i;
+  mapEl.querySelectorAll(".lit").forEach(x=>x.classList.remove("lit"));
+  let cur=tnodes[i];
+  while(cur){
+    mapEl.querySelector(`.tn[data-i="${cur.i}"]`).classList.add("lit");
+    if(cur.parent){const p=mapEl.querySelector(`.lk[data-from="${cur.parent.i}"][data-to="${cur.i}"]`);
+      if(p)p.classList.add("lit");}
+    cur=cur.parent;
+  }
+  mapEl.classList.add("picked");
+  const n=tnodes[i];
+  const rel=n.gen===0?"The boy himself":REL[n.gen-1][n.parent&&n.parent.kids[1]===n?1:0];
+  say(`<b>${n.node.name}</b> — ${n.gen?"Yoshi's "+rel.toLowerCase():"that's you, mate"}. ${says(n.node)}.`);
+}
+document.getElementById("mapsvg").addEventListener("click",e=>{
+  const g=e.target.closest(".tn");if(g)pick(+g.dataset.i);});
+document.getElementById("mapsvg").addEventListener("keydown",e=>{
+  if(e.key==="Enter"||e.key===" "){const g=e.target.closest(".tn");if(g){e.preventDefault();pick(+g.dataset.i);}}});
 
 /* ---------------- the decoder ---------------- */
 const TITLES=[
