@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yoshi Cormac Babaganoush — the family tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Archivo:wght@400;500;700&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lilac:#E4DCF6;--lilac-deep:#C9BCEA;--milk:#FFFCF4;
+  --grape:#332049;--grape-soft:#7A6A93;--coral:#F2685C;--marigold:#F8C13C;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--lilac);color:var(--grape);font-family:'Archivo',system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--coral);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px 90px}
+
+/* hero */
+header{padding:40px 0 6px;display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.bigcat{width:160px;height:160px;flex:none;cursor:pointer;filter:drop-shadow(0 16px 24px rgba(51,32,73,.25))}
+.bigcat:active{transform:scale(.96)}
+.hero-txt{flex:1;min-width:260px}
+.eyebrow{display:inline-block;background:var(--marigold);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:99px;margin:0 0 14px;transform:rotate(-1.6deg)}
+h1{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:clamp(2.1rem,6.4vw,3.6rem);line-height:.96;margin:0;letter-spacing:-.02em;font-variation-settings:'SOFT' 90,'WONK' 1}
+h1 span{color:var(--coral)}
+.sub{margin:13px 0 0;color:var(--grape-soft);max-width:44ch}
+.facts{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0 0;padding:0;list-style:none}
+.facts li{background:var(--milk);border:2px solid var(--grape);border-radius:99px;padding:5px 13px;font-size:13px;font-weight:500}
+.facts b{font-family:'IBM Plex Mono',monospace;font-weight:400;color:var(--grape-soft);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;margin-right:6px}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:26px 0 0}
+.grp-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--grape-soft);width:100%;margin:14px 0 2px}
+.pill{border:2px solid var(--grape);background:var(--milk);color:var(--grape);border-radius:99px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:transform .12s ease}
+.pill:hover{transform:translateY(-2px)}
+.pill[aria-pressed="true"]{background:var(--grape);color:var(--milk)}
+.pill i{width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 1.5px rgba(51,32,73,.3)}
+.pill.shout{background:var(--coral);border-color:var(--coral);color:#fff}
+
+/* sticky generation nav */
+.nav{position:sticky;top:0;z-index:40;background:var(--lilac);border-bottom:2px dotted var(--lilac-deep);margin-top:26px;padding:9px 0;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav a{flex:none;text-decoration:none;border:2px solid var(--grape);background:var(--milk);color:var(--grape);border-radius:99px;padding:5px 13px;font-size:12.5px;font-weight:500;white-space:nowrap}
+.nav a.on{background:var(--grape);color:var(--milk)}
+
+/* generations */
+.gen{position:relative;padding:34px 0 8px;border-left:3px dotted var(--lilac-deep);padding-left:22px;margin-left:8px}
+.gen:last-of-type{border-left-color:transparent}
+.gen-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;position:relative}
+.gen-head::before{content:'';position:absolute;left:-31px;top:9px;width:16px;height:16px;border-radius:50%;background:var(--coral);border:3px solid var(--lilac)}
+.gen-head h2{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:clamp(1.4rem,4vw,2rem);margin:0;letter-spacing:-.02em;font-variation-settings:'SOFT' 90,'WONK' 1}
+.gen-head .count{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft)}
+.gen-note{margin:2px 0 18px;color:var(--grape-soft);font-size:13.5px;max-width:52ch}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.pair{background:rgba(255,252,244,.5);border:2px dotted var(--lilac-deep);border-radius:18px;padding:11px}
+.pair-label{margin:0 0 9px;font-size:11.5px;color:var(--grape-soft);font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
+.pair-label b{color:var(--grape);font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:0}
+.duo{display:grid;gap:8px}
+
+/* cat card */
+.card{width:100%;background:var(--milk);border:2px solid var(--grape);border-radius:14px;padding:8px 10px;display:flex;gap:10px;align-items:center;cursor:pointer;text-align:left;transition:opacity .25s ease,transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s ease}
+.card:hover{transform:translateY(-3px) rotate(-.6deg);box-shadow:0 8px 0 -2px var(--lilac-deep)}
+.card.pop{animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.07) rotate(1.5deg)}100%{transform:scale(1)}}
+.card svg{width:48px;height:48px;flex:none}
+.card .rel{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--grape-soft);display:block;margin-bottom:2px}
+.card .name{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:14.5px;line-height:1.15;display:block}
+.card .title{display:block;color:var(--coral);font-size:9.5px;font-family:'IBM Plex Mono',monospace;letter-spacing:.08em}
+.card .desc{font-size:11px;color:var(--grape-soft);line-height:1.25;margin-top:2px}
+.card.dim{opacity:.16}
+.card.hit{border-color:var(--coral);box-shadow:0 6px 0 -2px var(--coral)}
+.card.root{background:var(--marigold);border-width:3px;max-width:340px}
+
+#bubble{position:fixed;left:50%;bottom:20px;transform:translate(-50%,150%);background:var(--grape);color:var(--milk);padding:13px 20px;border-radius:16px;font-size:14px;max-width:min(92vw,460px);z-index:60;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 10px 30px -10px rgba(51,32,73,.6)}
+#bubble.show{transform:translate(-50%,0)}
+#bubble b{color:var(--marigold)}
+.paw{position:fixed;font-size:22px;pointer-events:none;z-index:70;animation:float 1.5s ease-out forwards}
+@keyframes float{to{transform:translate(var(--dx),-160px) rotate(var(--r));opacity:0}}
+
+footer{margin-top:44px;border-top:2px dotted var(--lilac-deep);padding-top:20px;font-size:13px;color:var(--grape-soft);max-width:62ch}
+@media (min-width:620px){.duo{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.pairs{grid-template-columns:1fr}header{padding:24px 0 4px;gap:18px}.bigcat{width:118px;height:118px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <svg id="bigcat" viewBox="0 0 100 100" role="img" aria-label="Yoshi, a lilac and white British Shorthair"></svg>
+  <div class="hero-txt">
+    <p class="eyebrow">🐾 31 cats · 5 generations · scroll back in time</p>
+    <h1>Yoshi Cormac <span>Babaganoush</span></h1>
+    <p class="sub">Every cat on his pedigree certificate, drawn in the coat colour the paperwork says they were. Tap anyone to meet them.</p>
+    <ul class="facts">
+      <li><b>Breed</b>British Shorthair</li>
+      <li><b>Coat</b>Lilac bi-colour</li>
+      <li><b>Born</b>23 Aug 2025</li>
+      <li><b>Age</b><span id="age"></span></li>
+      <li><b>Code</b>BRI c 03</li>
+    </ul>
+  </div>
+</header>
+
+<div class="controls">
+  <button class="pill shout" id="lucky">🎲 Meet a random ancestor</button>
+  <button class="pill" id="sound" aria-pressed="true">🔊 Meows on</button>
+  <span class="grp-label">Where did the colours come from? Tap one to trace it</span>
+  <div class="controls" id="legend" style="margin:0;gap:6px"></div>
+</div>
+
+<nav class="nav" id="nav"></nav>
+
+<div id="tree"></div>
+
+<footer>Transcribed from Yoshi's pedigree certificate. Coat colours come from the EMS codes on the document — bi-colours get a white bib, torties get a patch down one side, and Windymeadow Fleetwood Mac gets his tabby stripes. Names in coral carry championship titles, exactly as printed in red on the original.</footer>
+</div>
+
+<div id="bubble" role="status" aria-live="polite"></div>
+
+<script>
+const C={lilac:"#B7A6BC",white:"#FFFDF7",cream:"#F5DFB2",blue:"#8496AB",cinnamon:"#B8734A",chocolate:"#6B4530",red:"#DE8B45",fawn:"#CDB3A2",black:"#4A3F4E"};
+const EYE="#E9A72B";
+const n=(name,code,desc,cols,title,tabby)=>({name,code,desc,cols:cols||[],title:title||null,tabby:!!tabby});
+
+const T=Object.assign(n("Yoshi Cormac Babaganoush","BRI c 03","Lilac and white bi-colour",["lilac","white"]),{
+ sire:Object.assign(n("Ronaldo Olivia Charm","BSH e 02 62","Orange-eyed cream and white",["cream","white"]),{
+  sire:Object.assign(n("Iiver Britgrace","BSH c 03","Lilac and white bi-colour",["lilac","white"]),{
+   sire:Object.assign(n("Leonard Britgrace","BSH e 03","Cream and white bi-colour",["cream","white"]),{
+    sire:n("Chopin Britgrace","BSH e 03","Cream and white bi-colour",["cream","white"]),
+    dam:n("Aysha Symbol of Zhanna","BSH j 03","Lilac tortie and white bi-colour",["lilac","cream","white"])}),
+   dam:Object.assign(n("Fiordaliso Britgrace","BSH g","Blue-cream",["blue","cream"]),{
+    sire:n("Rays of Hope Charlie","BSH a","Blue",["blue"]),
+    dam:n("Dolly di Cucciolandia","BSH g","Blue-cream",["blue","cream"])})}),
+  dam:Object.assign(n("Hennessy Olivia Charm","BSH q 03","Cinnamon tortie and white",["cinnamon","cream","white"]),{
+   sire:Object.assign(n("Ablikats Iceberg","BSH a","Blue-cream",["blue","cream"]),{
+    sire:n("Ablikats Bayton","BSH a","Blue",["blue"]),
+    dam:n("Florence Pluche Dzhan","BSH a","Blue",["blue"])}),
+   dam:Object.assign(n("Charmante Isabella","BSH Q 03","Cinnamon tortie and white",["cinnamon","cream","white"]),{
+    sire:n("Kevin Briraspbery","BSH d 03","Red and white bi-colour",["red","white"]),
+    dam:n("Ballou Cat Charmante","BSH b 03","Chocolate and white bi-colour",["chocolate","white"])})})}),
+ dam:Object.assign(n("Winnosie Poppie","BRI c 03","Lilac and white",["lilac","white"]),{
+  sire:Object.assign(n("Breezing Eric Neaum","Lilac (15c)","Lilac",["lilac"]),{
+   sire:Object.assign(n("Windymeadow Fleetwood Mac","Lilac ticked tabby (15 45c)","Lilac ticked tabby",["lilac"],null,true),{
+    sire:n("Kastanjeback's Fraskudde","Cream (17)","Cream",["cream"],"TR GR CH"),
+    dam:n("Blue Generations Wild Angel","40 13","Imported",["blue"],"IMP")}),
+   dam:Object.assign(n("Breezing Cup-Cake","Blue (16)","Blue",["blue"]),{
+    sire:n("Wyrewood Clifford","Blue (16)","Blue",["blue"]),
+    dam:n("Breezing Vitesse","Blue (16)","Blue",["blue"])})}),
+  dam:Object.assign(n("Makdissy Angelica","BRI g 03","Blue-cream and white",["blue","cream","white"]),{
+   sire:Object.assign(n("Ushiko of Kotoffski","BSH a","Blue",["blue"]),{
+    sire:n("Bonaparte vom Kupferstich","BRI p","Fawn",["fawn"],"GR.I.CH"),
+    dam:n("Langewald Magic Future Star","BRI f","Black tortie",["black","red"],"LV*")}),
+   dam:Object.assign(n("Yasmin British Flowering","BRI g 02","Blue-cream and white",["blue","cream","white"],"CHAMPION"),{
+    sire:n("Baset-A-Tet Gummybear","BRI e 02","Cream and white",["cream","white"]),
+    dam:n("Grace Dominica Leven Dee","BLH p 03","Fawn and white, longhair",["fawn","white"])})})})
+});
+
+/* ---------- cat face ---------- */
+let uid=0;
+function face(node){
+  const id="c"+(uid++);
+  const solid=node.cols.filter(c=>c!=="white");
+  const base=C[solid[0]]||"#B7A6BC", patch=solid[1]?C[solid[1]]:null, bib=node.cols.includes("white");
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+  <defs><clipPath id="${id}"><ellipse cx="50" cy="57" rx="37" ry="33"/></clipPath></defs>
+  <path d="M17 40 L14 12 L42 27 Z" fill="${base}" stroke="#332049" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M83 40 L86 12 L58 27 Z" fill="${patch||base}" stroke="#332049" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M21 34 L20 20 L36 28 Z" fill="#E9A7B4"/><path d="M79 34 L80 20 L64 28 Z" fill="#E9A7B4"/>
+  <ellipse cx="50" cy="57" rx="37" ry="33" fill="${base}"/>
+  <g clip-path="url(#${id})">
+    ${patch?`<path d="M50 20 L96 20 L96 95 L56 95 Q46 60 50 20Z" fill="${patch}"/>`:""}
+    ${bib?`<path d="M50 44 q9 0 11 14 q14 4 14 20 v18 H25 v-18 q0-16 14-20 q2-14 11-14Z" fill="${C.white}"/>`:""}
+    ${node.tabby?`<g stroke="#332049" stroke-opacity=".35" stroke-width="3" stroke-linecap="round" fill="none"><path d="M40 30 l6 8"/><path d="M50 27 l0 9"/><path d="M60 30 l-6 8"/></g>`:""}
+  </g>
+  <ellipse cx="50" cy="57" rx="37" ry="33" fill="none" stroke="#332049" stroke-width="3"/>
+  <g class="eyes"><circle cx="36" cy="54" r="8.5" fill="${EYE}" stroke="#332049" stroke-width="2.5"/><circle cx="64" cy="54" r="8.5" fill="${EYE}" stroke="#332049" stroke-width="2.5"/></g>
+  <g class="pupils"><ellipse cx="36" cy="54" rx="3.4" ry="5" fill="#332049"/><ellipse cx="64" cy="54" rx="3.4" ry="5" fill="#332049"/></g>
+  <path d="M46 68 h8 l-4 5 Z" fill="#C96E7E"/>
+  <path d="M50 73 q-5 6 -10 2 M50 73 q5 6 10 2" stroke="#332049" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <g stroke="#332049" stroke-width="2" stroke-linecap="round" opacity=".5"><path d="M14 62 h14 M14 70 h14 M86 62 h-14 M86 70 h-14"/></g></svg>`;
+}
+
+/* ---------- collect generations ---------- */
+const GENS=[
+ {id:"g0",label:"Yoshi",note:"Born 23 August 2025. Lilac and white, non-active registration — meaning he's a pet, not a breeding cat."},
+ {id:"g1",label:"Parents",note:"His mum came from the Winnosie cattery; his dad from Olivia Charm."},
+ {id:"g2",label:"Grandparents",note:"Four cats. The lilac shows up on both sides here — Iiver on his dad's side, Breezing Eric on his mum's."},
+ {id:"g3",label:"Great-grandparents",note:"Eight cats, including a lilac ticked tabby and two cinnamon torties."},
+ {id:"g4",label:"Great-great-grandparents",note:"Sixteen cats, four of them titled — a Danish grand champion, an international grand champion, a Latvian line and an import."}
+];
+const REL=[["Dad","Mum"],["Grandad","Nan"],["Great-grandad","Great-nan"],["Great-great-grandad","Great-great-nan"]];
+const rows=[[],[],[],[],[]];
+(function walk(node,gen,pos,side,parent){
+  rows[gen].push({node,pos,side,parent});
+  if(node.sire){
+    walk(node.sire,gen+1,0,gen===0?"dad's":side,node);
+    walk(node.dam,gen+1,1,gen===0?"mum's":side,node);
+  }
+})(T,0,null,null,null);
+
+/* ---------- render ---------- */
+const treeEl=document.getElementById("tree");let all=[];
+function card(entry,gen){
+  const {node,pos,side}=entry;
+  const rel = gen===0 ? "The boy himself" : REL[gen-1][pos] + (gen>1?` · ${side} side`:"");
+  const b=document.createElement("button");
+  b.type="button";b.className="card"+(gen?"":" root");b.dataset.cols=node.cols.join(" ");
+  b.innerHTML=face(node)+`<div><span class="rel">${rel}</span>
+    <span class="name">${node.title?`<span class="title">${node.title}</span>`:""}${node.name}</span>
+    <div class="desc">${node.desc} · ${node.code}</div></div>`;
+  b.addEventListener("click",()=>meet(b,node,rel));
+  all.push({node,el:b,rel});
+  return b;
+}
+GENS.forEach((g,gen)=>{
+  const s=document.createElement("section");s.className="gen";s.id=g.id;
+  s.innerHTML=`<div class="gen-head"><h2>${g.label}</h2><span class="count">${rows[gen].length} cat${rows[gen].length>1?"s":""}</span></div><p class="gen-note">${g.note}</p>`;
+  const box=document.createElement("div");box.className="pairs";
+  if(gen===0){box.appendChild(card(rows[0][0],0));}
+  else{
+    for(let i=0;i<rows[gen].length;i+=2){
+      const pair=document.createElement("div");pair.className="pair";
+      pair.innerHTML=`<p class="pair-label">Parents of <b>${rows[gen][i].parent.name}</b></p>`;
+      const duo=document.createElement("div");duo.className="duo";
+      duo.appendChild(card(rows[gen][i],gen));duo.appendChild(card(rows[gen][i+1],gen));
+      pair.appendChild(duo);box.appendChild(pair);
+    }
+  }
+  s.appendChild(box);treeEl.appendChild(s);
+});
+
+/* nav */
+const nav=document.getElementById("nav");
+nav.innerHTML=GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("");
+const links=[...nav.querySelectorAll("a")];
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)
+  links.forEach(l=>l.classList.toggle("on",l.getAttribute("href")==="#"+e.target.id));});},{rootMargin:"-20% 0px -70%"});
+GENS.forEach(g=>io.observe(document.getElementById(g.id)));
+
+/* colour trace */
+let filter=null;
+function applyFilter(){all.forEach(({el})=>{const has=!filter||el.dataset.cols.split(" ").includes(filter);
+  el.classList.toggle("dim",!has);el.classList.toggle("hit",!!filter&&has);});}
+const legend=document.getElementById("legend");
+Object.keys(C).forEach(k=>{
+  const b=document.createElement("button");b.className="pill";b.type="button";b.setAttribute("aria-pressed","false");
+  b.innerHTML=`<i style="background:${C[k]}"></i>${k[0].toUpperCase()+k.slice(1)}`;
+  b.onclick=()=>{filter=filter===k?null:k;
+    legend.querySelectorAll(".pill").forEach(s=>s.setAttribute("aria-pressed",String(s===b&&filter===k)));applyFilter();};
+  legend.appendChild(b);
+});
+
+/* meet + meow */
+const bubble=document.getElementById("bubble");let bt,sound=true,ac;
+function mrrp(seed){
+  if(!sound)return;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();
+    o.type="sawtooth";f.type="bandpass";f.frequency.value=1100;f.Q.value=4;
+    const base=430+(seed%9)*38;
+    o.frequency.setValueAtTime(base,t);o.frequency.linearRampToValueAtTime(base*1.5,t+.09);
+    o.frequency.linearRampToValueAtTime(base*.82,t+.3);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.13,t+.05);g.gain.exponentialRampToValueAtTime(.001,t+.34);
+    o.connect(f);f.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.35);}catch(e){}
+}
+function meet(el,node,rel){
+  el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");mrrp(node.name.length);
+  bubble.innerHTML=`<b>${node.name}</b> — ${rel==="The boy himself"?"that's you, mate":"Yoshi's "+rel.replace(" · "," on his ")}. ${node.desc}. Registered as <b>${node.code}</b>.${node.title?` Carries the title ${node.title}.`:""}`;
+  bubble.classList.add("show");clearTimeout(bt);bt=setTimeout(()=>bubble.classList.remove("show"),5200);
+}
+document.getElementById("lucky").onclick=()=>{
+  const p=all[Math.floor(Math.random()*all.length)];
+  p.el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>meet(p.el,p.node,p.rel),340);
+};
+const sBtn=document.getElementById("sound");
+sBtn.onclick=()=>{sound=!sound;sBtn.setAttribute("aria-pressed",String(sound));
+  sBtn.textContent=sound?"🔊 Meows on":"🔇 Meows off";if(sound)mrrp(3);};
+
+/* eyes follow */
+let eyeCache=[],raf;
+function cacheEyes(){eyeCache=[...document.querySelectorAll(".pupils")].map(p=>{
+  const r=p.ownerSVGElement.getBoundingClientRect();
+  return{p,cx:r.left+r.width/2,cy:r.top+r.height/2};});}
+function look(x,y){for(const e of eyeCache){const dx=x-e.cx,dy=y-e.cy,d=Math.hypot(dx,dy)||1,m=Math.min(d/60,1)*3.2;
+  e.p.setAttribute("transform",`translate(${(dx/d*m).toFixed(2)} ${(dy/d*m).toFixed(2)})`);}}
+addEventListener("pointermove",ev=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=null;look(ev.clientX,ev.clientY)});},{passive:true});
+addEventListener("scroll",cacheEyes,{passive:true});addEventListener("resize",cacheEyes);
+
+/* blinking */
+(function blink(){
+  const eyes=document.querySelectorAll(".eyes");
+  if(eyes.length&&!matchMedia("(prefers-reduced-motion:reduce)").matches){
+    const e=eyes[Math.floor(Math.random()*eyes.length)];
+    e.style.transformBox="fill-box";e.style.transformOrigin="center";
+    e.style.transition="transform .09s ease";e.style.transform="scaleY(.08)";
+    setTimeout(()=>e.style.transform="",110);
+  }
+  setTimeout(blink,600+Math.random()*900);
+})();
+
+/* hero + paws */
+document.getElementById("bigcat").outerHTML=face(T).replace("<svg ",'<svg class="bigcat" id="bigcat" ');
+document.getElementById("bigcat").addEventListener("click",e=>{
+  mrrp(1);
+  for(let i=0;i<9;i++){const p=document.createElement("div");p.className="paw";p.textContent="🐾";
+    p.style.left=(e.clientX-10)+"px";p.style.top=(e.clientY-10)+"px";
+    p.style.setProperty("--dx",(Math.random()*180-90)+"px");
+    p.style.setProperty("--r",(Math.random()*360-180)+"deg");
+    p.style.animationDelay=(i*45)+"ms";document.body.appendChild(p);setTimeout(()=>p.remove(),1700);}
+});
+
+/* age */
+(()=>{const b=new Date(2025,7,23),now=new Date();
+ let m=(now.getFullYear()-b.getFullYear())*12+now.getMonth()-b.getMonth();
+ if(now.getDate()<b.getDate())m--;
+ document.getElementById("age").textContent=m<12?m+" months":Math.floor(m/12)+"y "+(m%12)+"m";})();
+
+cacheEyes();
+</script>
+</body>
+</html>
