@@ -158,7 +158,7 @@ body.locked .gate{display:flex}
 
 /* drawn tree */
 .mapwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:rgba(255,252,244,.5);border:2px dotted var(--lilac-deep);border-radius:18px;padding:10px}
-#mapsvg>svg{display:block;min-width:1040px;width:100%;height:auto}
+#mapsvg>svg{display:block;min-width:1700px;width:100%;height:auto}
 .lk{fill:none;stroke:var(--lilac-deep);stroke-width:2.5}
 .tn{cursor:pointer}
 .tn rect{fill:var(--milk);stroke:var(--grape);stroke-width:2}
@@ -272,9 +272,9 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 <header>
   <svg id="bigcat" viewBox="0 0 100 100" role="img" aria-label="Yoshi, a lilac and white British Shorthair"></svg>
   <div class="hero-txt">
-    <p class="eyebrow">🐾 31 cats · 5 generations · scroll back in time</p>
+    <p class="eyebrow">🐾 45 cats · 8 generations · scroll back in time</p>
     <h1>Yoshi Cormac <span>Babaganoush</span></h1>
-    <p class="sub">Every cat on his pedigree certificate, drawn in the coat colour the paperwork says they were. Tap anyone to meet them.</p>
+    <p class="sub">Every cat on his pedigree certificate, drawn in the coat colour the paperwork says they were — and, on one branch, three more generations dug up since. Tap anyone to meet them.</p>
     <ul class="facts">
       <li><b>Breed</b>British Shorthair</li>
       <li><b>Coat</b>Lilac bi-colour</li>
@@ -303,8 +303,9 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 <section class="gen" id="map">
   <div class="gen-head"><h2>The whole tree, drawn out</h2>
     <button class="pill" id="replay">↻ Draw it again</button></div>
-  <p class="gen-note">Yoshi on the left, five generations reaching back to the right. Tap any cat to
-    light up the line that leads to him.</p>
+  <p class="gen-note">Yoshi on the left, reaching back to the right. Five generations come off his
+    certificate; the long branch running to the far right is Bonaparte's line, carried three
+    generations further by his own pedigree. Tap any cat to light up the line that leads to Yoshi.</p>
   <div class="mapwrap"><div id="mapsvg"></div></div>
 </section>
 
@@ -396,6 +397,8 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 const C={lilac:"#B7A6BC",white:"#FFFDF7",cream:"#F5DFB2",blue:"#8496AB",cinnamon:"#B8734A",chocolate:"#6B4530",red:"#DE8B45",fawn:"#CDB3A2",black:"#4A3F4E"};
 const EYE="#E9A72B";
 const n=(name,code,desc,cols,title,tabby)=>({name,code,desc,cols:cols||[],title:title||null,tabby:!!tabby});
+/* Same shape, but flagged as coming from research rather than Yoshi's own certificate. */
+const f=(name,code,desc,cols,title,health)=>Object.assign(n(name,code,desc,cols,title),{found:true,health:health||null});
 
 const T=Object.assign(n("Yoshi Cormac Babaganoush","BRI c 03","Lilac and white bi-colour",["lilac","white"]),{
  sire:Object.assign(n("Ronaldo Olivia Charm","BSH e 02 62","Orange-eyed cream and white",["cream","white"]),{
@@ -423,7 +426,23 @@ const T=Object.assign(n("Yoshi Cormac Babaganoush","BRI c 03","Lilac and white b
     dam:n("Breezing Vitesse","Blue (16)","Blue",["blue"])})}),
   dam:Object.assign(n("Makdissy Angelica","BRI g 03","Blue-cream and white",["blue","cream","white"]),{
    sire:Object.assign(n("Ushiko of Kotoffski","BSH a","Blue",["blue"]),{
-    sire:n("Bonaparte vom Kupferstich","BRI p","Fawn",["fawn"],"GR.I.CH"),
+    sire:Object.assign(n("Bonaparte vom Kupferstich","BRI p","Fawn ticked",["fawn"],"GR.I.CH"),{
+     /* Everything below here is off Bonaparte's own German pedigree, found on
+        the cattery that stood him at stud - not off Yoshi's certificate. */
+     sire:Object.assign(f("Timo vom kleinen Schlösschen","Chocolate","Chocolate",["chocolate"],"E.CH","PKD and HCM clear"),{
+      sire:Object.assign(f("Nedercats Bigger Bang Cimon","Cinnamon","Cinnamon",["cinnamon"],null,"PKD and HCM clear"),{
+       sire:f("Uccelini von Flöthbach","Rot","Red",["red"],"INT.CH"),
+       dam:f("Sun-Beam's Jeanet","Cinnamon-White","Cinnamon and white",["cinnamon","white"])}),
+      dam:Object.assign(f("Fatima vom Perlenstrand","Lilac","Lilac",["lilac"],null,"PKD and HCM clear"),{
+       sire:f("Vitus von der bunten Stadt","Blau","Blue",["blue"],"GR.INT.CH"),
+       dam:f("Orange Blue Yana-Tosca","Lilac-tortie","Lilac tortie",["lilac","cream"],"INT.CH")})}),
+     dam:Object.assign(f("Rosa vom Kupferstich","Blau","Blue",["blue"],"CH","PKD and HCM clear"),{
+      sire:Object.assign(f("Galahad v. Het Hof v. Logres","Lilac","Lilac",["lilac"],"E.CH","PKD and HCM clear"),{
+       sire:f("Obelix vom Elfenfohren","Lilac","Lilac",["lilac"]),
+       dam:f("Ceinwyn van Het Hof van Logres","Lilac","Lilac",["lilac"])}),
+      dam:Object.assign(f("Josepha vom Kupferstich","Blau-Creme","Blue-cream",["blue","cream"],null,"PKD and HCM clear"),{
+       sire:f("C. Botticelly Jr. v. Wernerwald","Creme","Cream",["cream"],"EC"),
+       dam:f("Anastasia blue vom Wernerwald","Blue","Blue",["blue"])})})}),
     dam:n("LV*Langewald Magic Future Star","BRI f","Black tortie",["black","red"])}),
    dam:Object.assign(n("Yasmin British Flowering","BRI g 02","Blue-cream and white",["blue","cream","white"],"CHAMPION"),{
     sire:n("Baset-A-Tet Gummybear","BRI e 02","Cream and white",["cream","white"]),
@@ -563,12 +582,16 @@ const GENS=[
  {id:"g1",label:"Parents",note:"His mum came from the Winnosie cattery; his dad from Olivia Charm."},
  {id:"g2",label:"Grandparents",note:"Four cats. The lilac shows up on both sides here — Iiver on his dad's side, Breezing Eric on his mum's."},
  {id:"g3",label:"Great-grandparents",note:"Eight cats, including a lilac ticked tabby and two cinnamon torties."},
- {id:"g4",label:"Great-great-grandparents",note:"Sixteen cats, four of them titled — a Danish grand champion, an international grand champion, a Latvian line and an import."}
+ {id:"g4",label:"Great-great-grandparents",note:"Sixteen cats, four of them titled — a triple grand champion, an international grand champion, a Latvian cattery and an import."},
+ {id:"g5",label:"3× great-grandparents",note:"Yoshi's certificate stops at the generation above. Everything from here down comes off Bonaparte vom Kupferstich's own German pedigree, which the Russian cattery that stood him at stud has published — so it's one branch of the family, carried on alone."},
+ {id:"g6",label:"4× great-grandparents",note:"Four more, all of them screened clear of PKD and HCM — this line was carefully bred."},
+ {id:"g7",label:"5× great-grandparents",note:"Eight cats, five of them titled, including a Grand International Champion. As far back as the paper trail goes."}
 ];
-const REL=[["Dad","Mum"],["Grandad","Nan"],["Great-grandad","Great-nan"],["Great-great-grandad","Great-great-nan"]];
-const rows=[[],[],[],[],[]];
+const REL=[["Dad","Mum"],["Grandad","Nan"],["Great-grandad","Great-nan"],["Great-great-grandad","Great-great-nan"],
+ ["3× great-grandad","3× great-nan"],["4× great-grandad","4× great-nan"],["5× great-grandad","5× great-nan"]];
+const rows=[];
 (function walk(node,gen,pos,side,parent){
-  rows[gen].push({node,pos,side,parent});
+  (rows[gen]=rows[gen]||[]).push({node,pos,side,parent});
   if(node.sire){
     walk(node.sire,gen+1,0,gen===0?"dad's":side,node);
     walk(node.dam,gen+1,1,gen===0?"mum's":side,node);
@@ -582,7 +605,7 @@ function card(entry,gen){
   const rel = gen===0 ? "The boy himself" : REL[gen-1][pos] + (gen>1?` · ${side} side`:"");
   const b=document.createElement("button");
   b.type="button";b.className="card"+(gen?"":" root");b.dataset.cols=node.cols.join(" ");
-  b.innerHTML=face(node)+`<div><span class="rel">${rel}</span>
+  b.innerHTML=face(node)+`<div><span class="rel">${rel}${node.found?' · researched':''}</span>
     <span class="name">${node.title?`<span class="title">${node.title}</span>`:""}${node.name}</span>
     <div class="desc">${says(node)}</div>
     <div class="code">${node.code}</div></div>`;
@@ -647,7 +670,12 @@ const TITLEWHAT={
  "CHAMPION":"Champion — the first rung, earned by collecting certificates from judges at shows.",
  "GR.I.CH":"Grand International Champion — two promotions above a plain Champion on the FIFe ladder (Champion, International Champion, then this).",
  "TR GR CH":"Triple Grand Champion — the highest title anywhere on Yoshi's pedigree.",
- "IMP":"Imported — brought in from another country's registry. Not a show title at all."
+ "IMP":"Imported — brought in from another country's registry. Not a show title at all.",
+ "CH":"Champion — the first rung of the show ladder.",
+ "E.CH":"European Champion — a continental title above Champion.",
+ "INT.CH":"International Champion — the rung above Champion on the FIFe ladder.",
+ "GR.INT.CH":"Grand International Champion — the same rank as Bonaparte's own GR.I.CH, written the German way.",
+ "EC":"European Champion, as written on the German pedigree."
 };
 function codeRows(code){
   const rows=[];let known=0;
@@ -671,7 +699,8 @@ const FOUND={
    url:"http://kotoffski.ru/?p=4014",
    facts:["Grand International Champion — his GR.I.CH confirmed.",
     "Fawn <b>ticked</b>, which the certificate doesn't record — it only says fawn.",
-    "Imported from Germany. Bred by Christiane Traut at the vom Kupferstich cattery.",
+    "Born 1 September 2010. Imported from Germany, bred by Christiane Traut at the vom Kupferstich cattery.",
+    "His own pedigree survives online and carries this family three generations further back than Yoshi's certificate does.",
     "His sire was <b>Eur.Ch Timo vom kleinen Schlösschen</b> (BRI b, chocolate).",
     "His dam was <b>Ch Rosa vom Kupferstich</b> (BRI a, blue).",
     "Tested clear of FeLV, FIV and PKD; heart scans clear in 2011 and 2013; blood group B."]},
@@ -691,7 +720,10 @@ function rankOf(node){
   const toks=String(node.code).trim().split(/\s+/).map(x=>x.replace(/[()]/g,""));
   for(const k of toks) if(k.length===1&&COLOUR[k.toLowerCase()])return k.toUpperCase();
   for(const k of toks) if(/^\d/.test(k))return k;      /* the UK side numbers instead */
-  return "·";
+  const WORD={chocolate:"B",blau:"A",blue:"A",lilac:"C",cinnamon:"O",rot:"D",red:"D",
+              creme:"E",cream:"E",fawn:"P",black:"N"};
+  const w=WORD[toks[0].toLowerCase().split("-")[0]];
+  return w||"·";
 }
 function showCat(node,rel,gen){
   const pcard=document.getElementById("pcard");
@@ -711,7 +743,8 @@ function showCat(node,rel,gen){
   document.getElementById("catname").textContent=node.name;
   document.getElementById("pcode").textContent=node.code;
   const depth=["Born 23 August 2025","One generation back","Two generations back",
-               "Three generations back","Four generations back"];
+               "Three generations back","Four generations back","Five generations back",
+               "Six generations back","Seven generations back"];
   document.getElementById("catgen").textContent=gen===undefined?"":depth[gen]||"";
 
   document.getElementById("cattitle").textContent=node.title?(TITLEWHAT[node.title]||node.title):"";
@@ -721,7 +754,11 @@ function showCat(node,rel,gen){
     `${says(node)}.${written} The portrait is drawn from those codes — colours, amount of white, markings and eyes all come off the paperwork.`;
   document.getElementById("catcode").innerHTML=
     codeRows(node.code).map(([t,d])=>`<div><dt>${t}</dt><dd>${d}</dd></div>`).join("");
-  const f=FOUND[node.name];
+  const bits=[];
+  if(node.health)bits.push(`Screened <b>${node.health}</b> — polycystic kidney disease and the heart condition British Shorthairs are watched for.`);
+  if(node.found)bits.push(`Not on Yoshi's certificate. This comes off <b>Bonaparte vom Kupferstich's</b> own German pedigree, published by the Russian cattery that stood him at stud.`);
+  const f=FOUND[node.name]||(bits.length?{facts:bits,src:"Bonaparte's pedigree, via kotoffski.ru",
+    url:"http://kotoffski.ru/wp-content/uploads/Pedigree-Bonaparte.jpg"}:null);
   document.getElementById("catfound").innerHTML=f
     ? `<p class="log-h" style="margin:15px 0 6px">Turned up online</p>
        <ul class="found">${f.facts.map(x=>`<li>${x}</li>`).join("")}</ul>
@@ -966,7 +1003,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape"&&!lb.hidden)closeShot()});
    Yoshi at the left, ancestors fanning out to the right. The sixteen cats in
    the last generation get an even row each; everyone else sits midway between
    the two parents they came from, which is what keeps the lines from crossing. */
-const COLW=208,NW=180,NH=62,ROWH=68;
+const COLW=206,NW=178,NH=62,ROWH=60;
 const tnodes=[];let leafY=0;
 (function place(node,gen,parent){
   const x=gen*COLW;let y;
