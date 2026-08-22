@@ -193,6 +193,13 @@ body.locked .gate{display:flex}
 .catcode div{display:flex;gap:10px;align-items:baseline;background:var(--lilac);border-radius:11px;padding:7px 10px}
 .catcode dt{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--grape);font-weight:400;flex:none;min-width:44px}
 .catcode dd{margin:0;font-size:12.5px;color:var(--grape-soft);line-height:1.35}
+/* the 3D cats draw into one canvas floating over the page */
+#furgl{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+.fur-slot{width:48px;height:48px;flex:none}
+.fur-slot svg{width:100%;height:100%}
+.bigcat.fur-slot{width:160px;height:160px}
+#catface>div{width:100%;height:100%}
+@media (max-width:620px){.bigcat.fur-slot{width:118px;height:118px}}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
 .stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
 .stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
@@ -246,6 +253,7 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 <div class="controls">
   <button class="pill shout" id="lucky">🎲 Meet a random ancestor</button>
   <button class="pill" id="sound" aria-pressed="true">🔊 Meows on</button>
+  <button class="pill" id="fur3d" aria-pressed="true" hidden>🧶 Fur on</button>
   <span class="grp-label">Where did the colours come from? Tap one to trace it</span>
   <div class="controls" id="legend" style="margin:0;gap:6px"></div>
 </div>
@@ -604,7 +612,7 @@ function codeRows(code){
 }
 const catEl=document.getElementById("cat");
 function showCat(node,rel){
-  document.getElementById("catface").innerHTML=face(node);
+  if(!(window.FURPANEL&&window.FURPANEL(node)))document.getElementById("catface").innerHTML=face(node);
   document.getElementById("catrel").textContent=rel;
   document.getElementById("catname").textContent=node.name;
   document.getElementById("cattitle").textContent=node.title?(TITLEWHAT[node.title]||node.title):"";
@@ -656,7 +664,8 @@ addEventListener("scroll",cacheEyes,{passive:true});addEventListener("resize",ca
 
 /* hero + paws */
 document.getElementById("bigcat").outerHTML=face(T).replace("<svg ",'<svg class="bigcat" id="bigcat" ');
-document.getElementById("bigcat").addEventListener("click",e=>{
+document.addEventListener("click",e=>{
+  if(!e.target.closest("#bigcat"))return;
   mrrp(1);
   for(let i=0;i<9;i++){const p=document.createElement("div");p.className="paw";p.textContent="🐾";
     p.style.left=(e.clientX-10)+"px";p.style.top=(e.clientY-10)+"px";
@@ -1078,6 +1087,22 @@ document.getElementById("gateform").addEventListener("submit",async ev=>{
 if(document.body.classList.contains("locked"))setTimeout(()=>document.getElementById("pw").focus(),120);
 
 cacheEyes();
+
+/* fur.js is a module, so it runs after this script. It needs the pedigree and
+   the same code-reading helpers the flat portraits use. */
+window.FUR={C,codeMeta,hashName,rng,EYECOL,all,root:T};
+</script>
+
+<script type="module">
+  import {furReplace,furPanel,furSet} from "./fur.js";
+  if(furReplace()){
+    window.FURPANEL=furPanel;
+    const btn=document.getElementById("fur3d");
+    let on=true; try{on=localStorage.getItem("yoshi.fur")!=="0"}catch(e){}
+    const paint=()=>{btn.setAttribute("aria-pressed",String(on));btn.textContent=on?"🧶 Fur on":"🧶 Fur off";};
+    btn.hidden=false;paint();
+    btn.onclick=()=>{on=!on;furSet(on);paint();};
+  }
 </script>
 </body>
 </html>
