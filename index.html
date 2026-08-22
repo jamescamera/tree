@@ -198,6 +198,11 @@ body.locked .gate{display:flex}
 .bigcat.fur-slot{width:160px;height:160px}
 #catface>div{width:100%;height:100%}
 @media (max-width:620px){.bigcat.fur-slot{width:118px;height:118px}}
+.found{margin:0;padding-left:17px;display:grid;gap:5px}
+.found li{font-size:12.5px;color:var(--grape-soft);line-height:1.4}
+.found li b{color:var(--grape)}
+.src{margin:9px 0 0;font-size:11.5px;color:var(--grape-soft);line-height:1.4}
+.src a{color:var(--coral)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
 .stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
 .stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
@@ -333,6 +338,7 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
   <p id="catdesc"></p>
   <p class="log-h" style="margin:14px 0 6px">What the pedigree says</p>
   <dl class="catcode" id="catcode"></dl>
+  <div id="catfound"></div>
 </aside>
 
 <div id="bubble" role="status" aria-live="polite"></div>
@@ -591,7 +597,7 @@ function say(html){bubble.innerHTML=html;bubble.classList.add("show");clearTimeo
 const TITLEWHAT={
  "CHAMPION":"Champion — the first rung, earned by collecting certificates from judges at shows.",
  "GR.I.CH":"Grand International Champion — two promotions above a plain Champion on the FIFe ladder (Champion, International Champion, then this).",
- "TR GR CH":"Grand Champion. The TR in front isn't documented by any registry — most likely \u201cTriple\u201d, carried across from wherever he was first shown.",
+ "TR GR CH":"Triple Grand Champion — the highest title anywhere on Yoshi's pedigree.",
  "IMP":"Imported — brought in from another country's registry. Not a show title at all."
 };
 function codeRows(code){
@@ -608,6 +614,26 @@ function codeRows(code){
   if(!known)return[[code,"Written the UK way, using GCCF breed numbers rather than the continental letter codes. The number is the breed-and-colour combination, not something you can read letter by letter."]];
   return rows.map(([t,d])=>[t,d||"part of the registry entry"]);
 }
+/* Found online rather than on the certificate, so it is kept separate and
+   always shows where it came from. Add a cat by name to extend this. */
+const FOUND={
+ "Bonaparte vom Kupferstich":{
+   src:"kotoffski.ru, the Russian cattery that stood him at stud",
+   url:"http://kotoffski.ru/?p=4014",
+   facts:["Grand International Champion — his GR.I.CH confirmed.",
+    "Fawn <b>ticked</b>, which the certificate doesn't record — it only says fawn.",
+    "Imported from Germany. Bred by Christiane Traut at the vom Kupferstich cattery.",
+    "His sire was <b>Eur.Ch Timo vom kleinen Schlösschen</b> (BRI b, chocolate).",
+    "His dam was <b>Ch Rosa vom Kupferstich</b> (BRI a, blue).",
+    "Tested clear of FeLV, FIV and PKD; heart scans clear in 2011 and 2013; blood group B."]},
+ "Kastanjeback's Fraskudde":{
+   src:"a British Shorthair breeder's own pedigree notes",
+   url:"https://www.muffinandpoppy.co.uk/british-shorthair/poppy/",
+   facts:["<b>Triple</b> Grand Champion — which settles what the TR on the certificate means.",
+    "Swedish-bred, and an import into the UK lines.",
+    "His pairing with Blue Generations Wild Angel produced the lilac ticked line that runs down to Yoshi.",
+    "That line is noted as carrying the cinnamon gene."]}
+};
 const catEl=document.getElementById("cat");
 function showCat(node,rel){
   if(!(window.FURPANEL&&window.FURPANEL(node)))document.getElementById("catface").innerHTML=face(node);
@@ -620,6 +646,12 @@ function showCat(node,rel){
     `${says(node)}.${written} Portrait drawn from those codes — the colours, the amount of white, the markings and the eyes all come off the paperwork.`;
   document.getElementById("catcode").innerHTML=
     codeRows(node.code).map(([t,d])=>`<div><dt>${t}</dt><dd>${d}</dd></div>`).join("");
+  const f=FOUND[node.name];
+  document.getElementById("catfound").innerHTML=f
+    ? `<p class="log-h" style="margin:15px 0 6px">Turned up online</p>
+       <ul class="found">${f.facts.map(x=>`<li>${x}</li>`).join("")}</ul>
+       <p class="src">From ${f.src} — <a href="${f.url}" target="_blank" rel="noopener">see it</a>.
+        Not on Yoshi's certificate, so treat it as a lead rather than gospel.</p>` : "";
   catEl.classList.add("show");
   bubble.classList.remove("show");
 }
@@ -937,7 +969,7 @@ document.getElementById("mapsvg").addEventListener("keydown",e=>{
 const TITLES=[
  ["CHAMPION","The first rung. A cat earns it by collecting certificates from judges at shows. <b>Yasmin British Flowering</b>, Yoshi's great-great-nan, carries it."],
  ["GR.I.CH","<b>Grand International Champion</b>, on the FIFe ladder: Champion, then International Champion, then this. Two promotions above a plain champion. That's <b>Bonaparte vom Kupferstich</b>, the fawn great-great-grandad."],
- ["TR GR CH","<b>Kastanjeback's Fraskudde</b>, printed in red on the certificate. <b>GR CH</b> is Grand Champion, the rung above Champion. The <b>TR</b> is the puzzle: no registry documents that exact form. The likeliest reading is <i>Triple</i> Grand Champion — TICA has that rank but writes it TGC — and his Swedish cattery name sits above a UK colour number, so a title probably got carried across from another registry by hand."],
+ ["TR GR CH","<b>Triple Grand Champion</b> — the top of the three Grand rungs, and the highest title on Yoshi's pedigree. It looked odd because no registry writes it that way (TICA uses TGC), but <b>Kastanjeback's Fraskudde</b> was Swedish-bred and the title came across onto UK paperwork by hand. A breeder's own notes on his line confirm the Triple."],
  ["IMP","Not a show title at all — short for <b>imported</b>, meaning the cat was brought in from another country's registry. <b>Blue Generations Wild Angel</b> is the import."],
  ["LV*","Also not a title. FIFe puts a country code and an asterisk in front of a cattery's name, so <b>LV*Langewald</b> simply means the Langewald cattery is registered in Latvia."]
 ];
