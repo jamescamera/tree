@@ -1,0 +1,1 @@
+pylitterbot==2025.6.4

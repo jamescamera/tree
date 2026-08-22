@@ -46,7 +46,7 @@ h1 span{color:var(--coral)}
 .nav a.on{background:var(--grape);color:var(--milk)}
 
 /* generations */
-.gen{position:relative;padding:34px 0 8px;border-left:3px dotted var(--lilac-deep);padding-left:22px;margin-left:8px}
+.gen{scroll-margin-top:58px;position:relative;padding:34px 0 8px;border-left:3px dotted var(--lilac-deep);padding-left:22px;margin-left:8px}
 .gen:last-of-type{border-left-color:transparent}
 .gen-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;position:relative}
 .gen-head::before{content:'';position:absolute;left:-31px;top:9px;width:16px;height:16px;border-radius:50%;background:var(--coral);border:3px solid var(--lilac)}
@@ -80,12 +80,95 @@ h1 span{color:var(--coral)}
 @keyframes float{to{transform:translate(var(--dx),-160px) rotate(var(--r));opacity:0}}
 
 footer{margin-top:44px;border-top:2px dotted var(--lilac-deep);padding-top:20px;font-size:13px;color:var(--grape-soft);max-width:62ch}
+/* ---------- password gate ---------- */
+body.locked{overflow:hidden}
+body.locked .wrap,body.locked #bubble{display:none}
+.gate{position:fixed;inset:0;z-index:100;background:var(--lilac);display:none;align-items:center;justify-content:center;padding:22px}
+body.locked .gate{display:flex}
+.gate-box{background:var(--milk);border:3px solid var(--grape);border-radius:24px;padding:26px 22px 22px;width:100%;max-width:390px;text-align:center;box-shadow:0 16px 0 -6px var(--lilac-deep)}
+.gate-cat{width:120px;height:120px;margin:0 auto -4px}
+.gate-cat svg{width:100%;height:100%}
+.gate-box h2{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.5rem;margin:8px 0 4px;letter-spacing:-.02em}
+.gate-box p{margin:0 0 16px;color:var(--grape-soft);font-size:13.5px}
+.gate-row{display:flex;gap:8px}
+.gate input{flex:1;min-width:0;font-family:'Archivo',sans-serif;font-size:15px;padding:10px 14px;border:2px solid var(--grape);border-radius:99px;background:#fff;color:var(--grape)}
+.gate button{border:2px solid var(--grape);background:var(--coral);border-color:var(--coral);color:#fff;border-radius:99px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer}
+.gate .err{margin:12px 0 0;color:var(--coral);font-weight:700;font-size:13px;min-height:18px}
+.gate.shake .gate-box{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}
+
+/* ---------- health log ---------- */
+.idcard{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;background:var(--milk);border:2px solid var(--grape);border-radius:18px;padding:14px 16px;margin:0 0 16px}
+.idcard div b{display:block;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft);margin-bottom:2px}
+.idcard div span{font-weight:500;font-size:14px;word-break:break-word}
+.due{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0 0 16px}
+.duecard{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:11px 14px}
+.duecard.soon{background:var(--marigold)}
+.duecard.over{background:var(--coral);border-color:var(--coral);color:#fff}
+.duecard.over .cd,.duecard.over .dd{color:rgba(255,255,255,.85)}
+.duecard .cd{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft)}
+.duecard strong{display:block;font-family:'Fraunces',Georgia,serif;font-size:15.5px;font-weight:600;margin:2px 0 1px}
+.duecard .dd{font-size:12px;color:var(--grape-soft)}
+.chart{background:var(--milk);border:2px solid var(--grape);border-radius:18px;padding:14px 16px 10px;margin:0 0 16px}
+.chart h3,.log-h{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--grape-soft);margin:0 0 8px}
+.chart svg{width:100%;height:auto;display:block}
+.log{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.entry{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:11px 13px;display:flex;gap:12px;align-items:flex-start}
+.entry.mine{border-style:dashed}
+.entry .ico{font-size:21px;line-height:1;flex:none;margin-top:2px}
+.entry .body{flex:1;min-width:0}
+.entry .when{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft)}
+.entry h3{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:15px;margin:1px 0 3px;letter-spacing:-.01em}
+.entry ul{margin:4px 0 0;padding-left:15px;font-size:12.5px;color:var(--grape-soft)}
+.entry .note{font-size:12.5px;color:var(--grape-soft);margin:3px 0 0}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid var(--lilac-deep);border-radius:99px;padding:2px 8px;color:var(--grape-soft)}
+.tag.w{background:var(--lilac);border-color:var(--lilac);color:var(--grape)}
+.tag.q{background:#fff;border-color:var(--coral);color:var(--coral)}
+.del{border:none;background:none;color:var(--grape-soft);font-size:16px;cursor:pointer;padding:0 2px;line-height:1}
+.addbox{margin:16px 0 0;background:rgba(255,252,244,.5);border:2px dotted var(--lilac-deep);border-radius:18px;padding:12px 14px}
+.addbox summary{cursor:pointer;font-weight:700;font-size:14px}
+.addbox form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:12px}
+.addbox label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft);display:block;margin-bottom:3px}
+.addbox input,.addbox select,.addbox textarea{width:100%;font-family:'Archivo',sans-serif;font-size:14px;padding:8px 11px;border:2px solid var(--grape);border-radius:12px;background:#fff;color:var(--grape)}
+.addbox textarea{min-height:56px;resize:vertical}
+.addbox .full{grid-column:1/-1}
+.addbox .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.addbox button{border:2px solid var(--grape);background:var(--grape);color:var(--milk);border-radius:99px;padding:8px 16px;font-size:13.5px;font-weight:700;cursor:pointer}
+.addbox button.ghost{background:var(--milk);color:var(--grape)}
+.hint{font-size:12px;color:var(--grape-soft);margin:10px 0 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
+.stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
+.stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
+.stat b i{font-style:normal;font-size:.85rem;font-weight:600;color:var(--grape-soft)}
+.stat span{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft)}
+.litter-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:24px 0 10px}
+.litter-head h3{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.3rem;margin:0;letter-spacing:-.02em}
+.litter-head .stamp{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--grape-soft)}
 @media (min-width:620px){.duo{grid-template-columns:1fr 1fr}}
 @media (max-width:620px){.pairs{grid-template-columns:1fr}header{padding:24px 0 4px;gap:18px}.bigcat{width:118px;height:118px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body>
+<body class="locked">
+
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="gate-cat" id="gatecat"></div>
+    <h2>Who goes there?</h2>
+    <p>Yoshi's paperwork lives behind this door. Password, please.</p>
+    <form class="gate-row" id="gateform">
+      <input type="password" id="pw" placeholder="password" autocomplete="current-password" aria-label="Password">
+      <button type="submit">Enter</button>
+    </form>
+    <p class="err" id="gateerr" role="alert"></p>
+  </div>
+</div>
+<script>
+/* unlock straight away if this device has already been let in */
+try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1d54a1f9b9dd998af0a99ae387d6b")document.body.classList.remove("locked");}catch(e){}
+</script>
+
 <div class="wrap">
 
 <header>
@@ -115,7 +198,39 @@ footer{margin-top:44px;border-top:2px dotted var(--lilac-deep);padding-top:20px;
 
 <div id="tree"></div>
 
-<footer>Transcribed from Yoshi's pedigree certificate. Coat colours come from the EMS codes on the document — bi-colours get a white bib, torties get a patch down one side, and Windymeadow Fleetwood Mac gets his tabby stripes. Names in coral carry championship titles, exactly as printed in red on the original.</footer>
+<section class="gen" id="health">
+  <div class="gen-head"><h2>Health log</h2><span class="count" id="logcount"></span></div>
+  <p class="gen-note">Everything off his vaccination card, plus the bits that happened at the Hackney vet. Newest first.</p>
+  <div class="idcard" id="idcard"></div>
+  <div class="due" id="due"></div>
+  <div class="chart" id="chart"></div>
+  <div id="litter" hidden></div>
+  <p class="log-h">The log</p>
+  <ol class="log" id="log"></ol>
+
+  <details class="addbox">
+    <summary>＋ Add something to the log</summary>
+    <form id="addform">
+      <div><label for="f-date">Date</label><input type="date" id="f-date" required></div>
+      <div><label for="f-kind">What was it</label><select id="f-kind">
+        <option value="vet">Vet visit</option><option value="vax">Vaccination</option>
+        <option value="worm">Worming</option><option value="flea">Flea treatment</option>
+        <option value="op">Procedure</option><option value="weigh">Weigh-in</option>
+        <option value="note">Note</option></select></div>
+      <div><label for="f-title">Short title</label><input id="f-title" placeholder="e.g. Annual booster" required></div>
+      <div><label for="f-weight">Weight (kg)</label><input id="f-weight" type="number" step="0.01" min="0" placeholder="optional"></div>
+      <div class="full"><label for="f-vet">Where / who</label><input id="f-vet" placeholder="e.g. Hackney vet"></div>
+      <div class="full"><label for="f-note">Notes</label><textarea id="f-note" placeholder="Batch numbers, what the vet said, next dose due…"></textarea></div>
+      <div class="acts">
+        <button type="submit">Save entry</button>
+        <button type="button" class="ghost" id="copyout">Copy my entries for the file</button>
+      </div>
+    </form>
+    <p class="hint">Entries you add here are saved in this browser only, so they show up on this device but not on anyone else's. Hit <b>copy my entries for the file</b> and paste the result to Claude (or into the <code>LOG</code> list in index.html) to make them permanent for everyone.</p>
+  </details>
+</section>
+
+<footer>Health log transcribed from his Icknield Vet Clinic vaccination card. Pedigree transcribed from Yoshi's pedigree certificate. Coat colours come from the EMS codes on the document — bi-colours get a white bib, torties get a patch down one side, and Windymeadow Fleetwood Mac gets his tabby stripes. Names in coral carry championship titles, exactly as printed in red on the original.</footer>
 </div>
 
 <div id="bubble" role="status" aria-live="polite"></div>
@@ -234,11 +349,11 @@ GENS.forEach((g,gen)=>{
 
 /* nav */
 const nav=document.getElementById("nav");
-nav.innerHTML=GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("");
+nav.innerHTML=GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a>`;
 const links=[...nav.querySelectorAll("a")];
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)
   links.forEach(l=>l.classList.toggle("on",l.getAttribute("href")==="#"+e.target.id));});},{rootMargin:"-20% 0px -70%"});
-GENS.forEach(g=>io.observe(document.getElementById(g.id)));
+GENS.forEach(g=>io.observe(document.getElementById(g.id)));io.observe(document.getElementById("health"));
 
 /* colour trace */
 let filter=null;
@@ -266,6 +381,7 @@ function mrrp(seed){
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.13,t+.05);g.gain.exponentialRampToValueAtTime(.001,t+.34);
     o.connect(f);f.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.35);}catch(e){}
 }
+function say(html){bubble.innerHTML=html;bubble.classList.add("show");clearTimeout(bt);bt=setTimeout(()=>bubble.classList.remove("show"),5200);}
 function meet(el,node,rel){
   el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");mrrp(node.name.length);
   bubble.innerHTML=`<b>${node.name}</b> — ${rel==="The boy himself"?"that's you, mate":"Yoshi's "+rel.replace(" · "," on his ")}. ${node.desc}. Registered as <b>${node.code}</b>.${node.title?` Carries the title ${node.title}.`:""}`;
@@ -317,6 +433,251 @@ document.getElementById("bigcat").addEventListener("click",e=>{
  let m=(now.getFullYear()-b.getFullYear())*12+now.getMonth()-b.getMonth();
  if(now.getDate()<b.getDate())m--;
  document.getElementById("age").textContent=m<12?m+" months":Math.floor(m/12)+"y "+(m%12)+"m";})();
+
+/* ================================================================
+   HEALTH LOG
+   To add a visit permanently: copy one of the blocks below, change
+   the bits you need and drop it into the LOG list. Fields:
+     date    "YYYY-MM-DD"
+     kind    vax | worm | flea | op | vet | weigh | note
+     title   short headline
+     vet     which practice
+     weight  kg, optional
+     items   [] bullet list, optional
+     note    one line under the bullets, optional
+     approx  true = date is a guess, shown as "about"
+     unsure  true = handwriting on the card was hard to read
+   ================================================================ */
+const CHIP="953010007498685";
+const LOG=[
+ {date:"2026-08-21",kind:"weigh",title:"SmartScale reading — 4.8 kg",vet:"Litter-Robot 4",weight:4.8,
+  note:"Off the Whisker app. Steady at 4.8 kg all week, 11 trips to the box over the week — an average of about 1.6 a day."},
+ {date:"2026-08-03",kind:"worm",title:"Wormer",vet:"Icknield Vet Clinic"},
+ {date:"2026-05-15",kind:"worm",title:"Wormer",approx:true,
+  note:"Remembered rather than written down — somewhere around May 2026. Worth nailing the date down with the vet."},
+ {date:"2026-01-27",kind:"worm",title:"Wormed",vet:"Hackney vet",weight:3.8},
+ {date:"2026-02-19",kind:"op",title:"Neutered",vet:"Hackney vet",
+  note:"The BackHome card has \u201cneutered 19th of Feb\u201d written on it, while the vaccination card puts neutering next to the microchip on 19 January. One of the two dates is off — worth a quick check with the vet."},
+ {date:"2026-01-19",kind:"op",title:"Microchipped",vet:"Hackney vet",
+  items:["Chip "+CHIP+" — a BackHome chip, registered on the PETtrac database","If he ever goes missing: PETtrac, 01273 408721"],
+  note:"Written on the vaccination card under booster vaccination. His name is recorded on the chip card as Yoshi."},
+ {date:"2025-12-11",kind:"flea",title:"De-flea and worming",vet:"Hackney vet",unsure:true},
+ {date:"2025-11-04",kind:"vax",title:"Second vaccination",vet:"Icknield Vet Clinic",weight:2.73,
+  items:["Nobivac Tricat Trio — lot A476A01, exp 06/2027","Nobivac FeLV — batch 9JXB01, exp 09/2026","Milbemax wormer given"],
+  note:"Next dose due November 2026 — that's the annual booster."},
+ {date:"2025-10-27",kind:"vax",title:"First vaccination",vet:"Icknield Vet Clinic",weight:1.95,
+  items:["Nobivac Tricat Trio — lot A476C01, exp 06/2027","Nobivac FeLV — batch 9J6J01, exp 09/2026","Milbemax wormer given"],
+  note:"Second dose booked for 3–4 weeks later."},
+ {date:"2025-08-23",kind:"note",title:"Born",note:"Lilac and white British Shorthair boy. See the tree above for the rest of the family."}
+];
+
+/* what's coming up — edit these two dates as things get done */
+const DUE=[
+ {what:"Annual booster",when:"2026-11-04",why:"Tricat Trio + FeLV, a year on from his second jab"},
+ {what:"Next wormer",when:"2026-11-03",why:"Roughly three months after the August one"}
+];
+
+const KIND={vax:{i:"💉",l:"Vaccination"},worm:{i:"💊",l:"Worming"},flea:{i:"🦟",l:"Fleas"},
+ op:{i:"🏥",l:"Procedure"},vet:{i:"🩺",l:"Vet visit"},weigh:{i:"⚖️",l:"Weigh-in"},note:{i:"📝",l:"Note"}};
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const LS="yoshi.health.v1";
+const mine=()=>{try{return JSON.parse(localStorage.getItem(LS))||[]}catch(e){return[]}};
+const saveMine=a=>{try{localStorage.setItem(LS,JSON.stringify(a))}catch(e){}};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function fmt(e){const d=new Date(e.date+"T12:00:00");
+  return e.approx?`about ${MON[d.getMonth()]} ${d.getFullYear()}`:`${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`;}
+const days=iso=>Math.round((new Date(iso+"T12:00:00")-new Date())/864e5);
+
+/* id card */
+document.getElementById("idcard").innerHTML=[
+ ["Microchip",CHIP],["Chip database","BackHome, on PETtrac"],["Lost cat line","01273 408721"],
+ ["Date of birth","23 August 2025"],["Sex","Male, neutered"],["Colour","Lilac and white"],
+ ["Vaccination card","Icknield Vet Clinic"],["Also seen by","Hackney vet"]
+].map(([k,v])=>`<div><b>${k}</b><span>${v}</span></div>`).join("");
+
+/* coming up */
+document.getElementById("due").innerHTML=DUE.map(d=>{
+  const n=days(d.when),cls=n<0?"over":n<=45?"soon":"";
+  const when=n<0?`${-n} days overdue`:n===0?"today":`in ${n} days`;
+  return `<div class="duecard ${cls}"><span class="cd">${when}</span><strong>${d.what}</strong>
+    <span class="dd">${fmt({date:d.when})} · ${d.why}</span></div>`;}).join("");
+
+/* weight chart */
+function chart(entries){
+  const pts=entries.filter(e=>e.weight).map(e=>({d:new Date(e.date+"T12:00:00"),w:+e.weight}))
+    .sort((a,b)=>a.d-b.d);
+  const box=document.getElementById("chart");
+  if(pts.length<2){box.style.display="none";return;}
+  box.style.display="";
+  const W=600,H=180,L=34,R=16,T=18,B=26;
+  const x0=+pts[0].d,x1=+pts[pts.length-1].d||x0+1;
+  const lo=Math.min(...pts.map(p=>p.w)),hi=Math.max(...pts.map(p=>p.w));
+  const pad=(hi-lo)*.25||.5;
+  const X=d=>L+(W-L-R)*((+d-x0)/((x1-x0)||1));
+  const Y=w=>T+(H-T-B)*(1-((w-(lo-pad))/((hi+pad)-(lo-pad))));
+  const line=pts.map((p,i)=>(i?"L":"M")+X(p.d).toFixed(1)+" "+Y(p.w).toFixed(1)).join(" ");
+  const anc=i=>i===0?"start":i===pts.length-1?"end":"middle";
+  let lastLbl=-1e9; const showLbl=i=>{const x=X(pts[i].d);
+    if(i===0||i===pts.length-1||x-lastLbl>=58){lastLbl=x;return true}return false};
+  const dots=pts.map((p,i)=>`<circle cx="${X(p.d).toFixed(1)}" cy="${Y(p.w).toFixed(1)}" r="5" fill="#F8C13C" stroke="#332049" stroke-width="2.5"/>
+    <text x="${X(p.d).toFixed(1)}" y="${(Y(p.w)+(i===0&&pts.length>1&&pts[1].w>p.w?17:-11)).toFixed(1)}" font-size="11" font-family="IBM Plex Mono,monospace" fill="#332049" text-anchor="${anc(i)}">${p.w}</text>
+    ${showLbl(i)?`<text x="${X(p.d).toFixed(1)}" y="${H-8}" font-size="10" font-family="IBM Plex Mono,monospace" fill="#7A6A93" text-anchor="${anc(i)}">${MON[p.d.getMonth()]} ${String(p.d.getFullYear()).slice(2)}</text>`:""}`).join("");
+  box.innerHTML=`<h3>Weight — ${pts[0].w} kg to ${pts[pts.length-1].w} kg</h3>
+   <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Yoshi's weight over time, ${pts.map(p=>p.w+' kg').join(', ')}">
+     <path d="${line}" fill="none" stroke="#F2685C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+     ${dots}</svg>`;
+}
+
+/* the log itself */
+function renderLog(){
+  const list=LOG.concat(mine().map(e=>Object.assign({},e,{local:true})))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+  const el=document.getElementById("log");
+  el.innerHTML=list.map(e=>{
+    const k=KIND[e.kind]||KIND.note;
+    const tags=[`<span class="tag">${k.l}</span>`];
+    if(e.vet)tags.push(`<span class="tag">${esc(e.vet)}</span>`);
+    if(e.weight)tags.push(`<span class="tag w">${e.weight} kg</span>`);
+    if(e.unsure)tags.push(`<span class="tag q">handwriting unclear</span>`);
+    if(e.local)tags.push(`<span class="tag q">this device only</span>`);
+    return `<li class="entry${e.local?" mine":""}"><span class="ico">${k.i}</span><div class="body">
+      <span class="when">${fmt(e)}</span><h3>${esc(e.title)}</h3>
+      ${e.items?`<ul>${e.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`:""}
+      ${e.note?`<p class="note">${esc(e.note)}</p>`:""}
+      <div class="tags">${tags.join("")}</div></div>
+      ${e.local?`<button class="del" data-id="${e.id}" title="Delete this entry" aria-label="Delete ${esc(e.title)}">✕</button>`:""}</li>`;
+  }).join("");
+  document.getElementById("logcount").textContent=list.length+" entries";
+  el.querySelectorAll(".del").forEach(b=>b.onclick=()=>{
+    saveMine(mine().filter(x=>String(x.id)!==b.dataset.id));renderLog();});
+  chart(list);
+}
+renderLog();
+
+document.getElementById("addform").addEventListener("submit",ev=>{
+  ev.preventDefault();
+  const g=id=>document.getElementById(id).value.trim();
+  const e={id:Date.now(),date:g("f-date"),kind:g("f-kind"),title:g("f-title"),
+    vet:g("f-vet")||undefined,weight:g("f-weight")?+g("f-weight"):undefined,note:g("f-note")||undefined};
+  saveMine(mine().concat([e]));renderLog();
+  ev.target.reset();
+  say(`Saved — <b>${esc(e.title)}</b> is in the log. It lives in this browser until you copy it into the file.`);
+});
+document.getElementById("copyout").onclick=()=>{
+  const m=mine();
+  if(!m.length)return say("Nothing added on this device yet.");
+  const txt=m.sort((a,b)=>b.date.localeCompare(a.date)).map(e=>" "+JSON.stringify(
+    {date:e.date,kind:e.kind,title:e.title,vet:e.vet,weight:e.weight,note:e.note},
+    (k,v)=>v===undefined?undefined:v)+",").join("\n");
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject())
+    .then(()=>say("Copied — paste it to Claude, or into the <b>LOG</b> list in index.html."))
+    .catch(()=>{prompt("Copy this into the LOG list in index.html:",txt);});
+};
+
+/* ---------------- Litter-Robot ----------------
+   data/litter.json is written once a day by the GitHub Action in
+   .github/workflows/litter-sync.yml. Whisker only keeps 7 days unless you pay
+   for Whisker+, so the job grabs that window daily and we keep the archive.
+   No file yet (or the job has never run) = this panel just stays hidden.
+------------------------------------------------ */
+const DAY=864e5;
+function bars(days){
+  const W=600,H=160,L=24,R=10,T=16,B=30;
+  const max=Math.max(1,...days.map(d=>d.n));
+  const step=(W-L-R)/days.length, bw=Math.min(26,step*.55);
+  const y=n=>T+(H-T-B)*(1-n/max);
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Trips to the litter box per day, most recent ${days.length} days">
+    <line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="#C9BCEA" stroke-width="2"/>
+    ${days.map((d,i)=>{const cx=L+step*(i+.5);const h=(H-B)-y(d.n);
+      return `${d.n?`<rect x="${(cx-bw/2).toFixed(1)}" y="${y(d.n).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="4" fill="#F2685C" stroke="#332049" stroke-width="2"/>
+        <text x="${cx.toFixed(1)}" y="${(y(d.n)-6).toFixed(1)}" font-size="11" font-family="IBM Plex Mono,monospace" fill="#332049" text-anchor="middle">${d.n}</text>`:""}
+        ${days.length<=16||i%2===0?`<text x="${cx.toFixed(1)}" y="${H-10}" font-size="9.5" font-family="IBM Plex Mono,monospace" fill="#7A6A93" text-anchor="middle">${d.lbl}</text>`:""}`;}).join("")}
+  </svg>`;
+}
+function spark(pts){
+  const W=600,H=150,L=34,R=14,T=16,B=24;
+  const x0=+pts[0].d,x1=+pts[pts.length-1].d;
+  const lo=Math.min(...pts.map(p=>p.w)),hi=Math.max(...pts.map(p=>p.w));
+  const pad=(hi-lo)*.3||.25;
+  const X=d=>L+(W-L-R)*((+d-x0)/((x1-x0)||1));
+  const Y=w=>T+(H-T-B)*(1-((w-(lo-pad))/((hi+pad)-(lo-pad))));
+  const line=pts.map((p,i)=>(i?"L":"M")+X(p.d).toFixed(1)+" "+Y(p.w).toFixed(1)).join(" ");
+  const ends=[[pts[0],"start"],[pts[pts.length-1],"end"]].map(([p,a])=>
+    `<circle cx="${X(p.d).toFixed(1)}" cy="${Y(p.w).toFixed(1)}" r="5" fill="#F8C13C" stroke="#332049" stroke-width="2.5"/>
+     <text x="${X(p.d).toFixed(1)}" y="${(Y(p.w)-11).toFixed(1)}" font-size="11" font-family="IBM Plex Mono,monospace" fill="#332049" text-anchor="${a}">${p.w} kg</text>
+     <text x="${X(p.d).toFixed(1)}" y="${H-7}" font-size="9.5" font-family="IBM Plex Mono,monospace" fill="#7A6A93" text-anchor="${a}">${MON[p.d.getMonth()]} ${p.d.getDate()}</text>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Weight from the litter box scale, ${pts[0].w} to ${pts[pts.length-1].w} kg">
+    <path d="${line}" fill="none" stroke="#F2685C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${ends}</svg>`;
+}
+function renderLitter(pet,updated){
+  const rs=(pet.readings||[]).map(r=>({t:new Date(r.t),kg:r.kg})).filter(r=>!isNaN(r.t));
+  if(!rs.length)return "";
+  const now=Date.now(), last=rs[rs.length-1];
+  const within=n=>rs.filter(r=>now-r.t<n*DAY);
+  const week=within(7);
+  const spanDays=Math.max(1,Math.round((now-rs[0].t)/DAY));
+
+  /* one reading = one trip to the box */
+  const buckets=new Map();
+  for(const r of rs){const k=r.t.toISOString().slice(0,10);
+    buckets.set(k,(buckets.get(k)||0)+1);}
+  const days=[];
+  for(let i=13;i>=0;i--){const d=new Date(now-i*DAY),k=d.toISOString().slice(0,10);
+    days.push({lbl:["Su","M","Tu","W","Th","F","Sa"][d.getDay()],n:buckets.get(k)||0});}
+
+  const dayKgs=[...new Map(rs.map(r=>[r.t.toISOString().slice(0,10),r])).entries()]
+    .map(([k,r])=>({d:new Date(k+"T12:00:00"),w:r.kg}));
+  const recent=dayKgs.slice(-60);
+
+  const tiles=[
+    [last.kg+"<i> kg</i>","Latest weight"],
+    [week.length,"Visits, last 7 days"],
+    [(week.length/7).toFixed(1),"Visits a day"],
+    [spanDays+"<i> d</i>","History kept"]
+  ].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+
+  return `<div class="litter-head"><h3>Litter-Robot</h3>
+      <span class="stamp">last reading ${fmt({date:last.t.toISOString().slice(0,10)})}${updated?` · synced ${fmt({date:updated.slice(0,10)})}`:""}</span></div>
+    <div class="stats">${tiles}</div>
+    <div class="chart"><h3>Trips to the box — last 14 days</h3>${bars(days)}</div>
+    ${recent.length>1?`<div class="chart" style="margin-top:10px"><h3>Weight off the box scale</h3>${spark(recent)}</div>`:""}`;
+}
+fetch("data/litter.json",{cache:"no-store"})
+  .then(r=>r.ok?r.json():null)
+  .then(d=>{
+    if(!d||!d.pets)return;
+    const pet=d.pets["Yoshi"]||Object.values(d.pets)[0];
+    if(!pet)return;
+    const html=renderLitter(pet,d.updated);
+    if(!html)return;
+    const box=document.getElementById("litter");
+    box.innerHTML=html;box.hidden=false;
+  })
+  .catch(()=>{/* no data file yet — leave the panel hidden */});
+
+/* ---------- the door ---------- */
+const PASS="6514ab2c2edb4fdbc54e268085913b6cf5f1d54a1f9b9dd998af0a99ae387d6b"; /* sha-256 of the password */
+const PASS_FALLBACK=1338200922; /* only used where crypto.subtle is missing, e.g. opening the file locally */
+async function hash(t){
+  if(!(window.crypto&&crypto.subtle))return null;
+  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+function weak(t){let h=2166136261;for(const c of t){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}return h;}
+document.getElementById("gatecat").innerHTML=face(T);
+const gate=document.getElementById("gate"),gerr=document.getElementById("gateerr");
+document.getElementById("gateform").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const v=document.getElementById("pw").value;
+  const h=await hash(v);
+  const ok=h?h===PASS:weak(v)===PASS_FALLBACK;
+  if(ok){try{localStorage.setItem("yoshi.key",PASS)}catch(e){}
+    document.body.classList.remove("locked");cacheEyes();mrrp(4);
+    say("Welcome back. <b>Yoshi</b> has been waiting.");
+  }else{gerr.textContent="Not it. Try again?";gate.classList.remove("shake");void gate.offsetWidth;gate.classList.add("shake");
+    document.getElementById("pw").select();}
+});
+if(document.body.classList.contains("locked"))setTimeout(()=>document.getElementById("pw").focus(),120);
 
 cacheEyes();
 </script>
