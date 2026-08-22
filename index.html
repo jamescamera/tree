@@ -53,7 +53,7 @@ h1 span{color:var(--coral)}
 .gen-head h2{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:clamp(1.4rem,4vw,2rem);margin:0;letter-spacing:-.02em;font-variation-settings:'SOFT' 90,'WONK' 1}
 .gen-head .count{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft)}
 .gen-note{margin:2px 0 18px;color:var(--grape-soft);font-size:13.5px;max-width:52ch}
-.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
 .pair{background:rgba(255,252,244,.5);border:2px dotted var(--lilac-deep);border-radius:18px;padding:11px}
 .pair-label{margin:0 0 9px;font-size:11.5px;color:var(--grape-soft);font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
 .pair-label b{color:var(--grape);font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:0}
@@ -65,6 +65,8 @@ h1 span{color:var(--coral)}
 .card.pop{animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.07) rotate(1.5deg)}100%{transform:scale(1)}}
 .card svg{width:48px;height:48px;flex:none}
+.card>div{min-width:0}
+.card .name,.card .desc,.card .rel{overflow-wrap:anywhere}
 .card .rel{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--grape-soft);display:block;margin-bottom:2px}
 .card .name{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:14.5px;line-height:1.15;display:block}
 .card .title{display:block;color:var(--coral);font-size:9.5px;font-family:'IBM Plex Mono',monospace;letter-spacing:.08em}
@@ -145,7 +147,7 @@ body.locked .gate{display:flex}
 .litter-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:24px 0 10px}
 .litter-head h3{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.3rem;margin:0;letter-spacing:-.02em}
 .litter-head .stamp{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--grape-soft)}
-@media (min-width:620px){.duo{grid-template-columns:1fr 1fr}}
+@media (min-width:620px){.duo{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 @media (max-width:620px){.pairs{grid-template-columns:1fr}header{padding:24px 0 4px;gap:18px}.bigcat{width:118px;height:118px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -200,7 +202,8 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 
 <section class="gen" id="health">
   <div class="gen-head"><h2>Health log</h2><span class="count" id="logcount"></span></div>
-  <p class="gen-note">Everything off his vaccination card, plus the bits that happened at the Hackney vet. Newest first.</p>
+  <p class="gen-note">Everything off his vaccination card, plus the bits that happened at the Hackney vet. Newest first.
+    He was card <b>226</b> at Icknield before anyone had written a name on him.</p>
   <div class="idcard" id="idcard"></div>
   <div class="due" id="due"></div>
   <div class="chart" id="chart"></div>
@@ -452,8 +455,8 @@ const CHIP="953010007498685";
 const LOG=[
  {date:"2026-08-21",kind:"weigh",title:"Box scale reading — 4.8 kg",vet:"Litter-Robot 4",weight:4.8,source:"scale",
   note:"Off the Whisker app. Steady at 4.8 kg all week, 11 trips to the box over the week — an average of about 1.6 a day."},
- {date:"2026-08-17",kind:"vet",title:"Vet weigh-in — 4.6 kg",weight:4.6,approx:true,
-  note:"The vet's scale, and the reference the box scale gets checked against. Exact date to confirm."},
+ {date:"2026-08-22",kind:"vet",title:"Vet weigh-in — 4.6 kg",weight:4.6,
+  note:"The vet's scale, and the reference the box scale gets checked against."},
  {date:"2026-08-03",kind:"worm",title:"Wormer",vet:"Icknield Vet Clinic"},
  {date:"2026-05-15",kind:"worm",title:"Wormer",approx:true,
   note:"Remembered rather than written down — somewhere around May 2026. Worth nailing the date down with the vet."},
@@ -464,7 +467,7 @@ const LOG=[
   items:["Chip "+CHIP+" — a BackHome chip, registered on the PETtrac database","If he ever goes missing: PETtrac, 01273 408721"],
   note:"Written on the vaccination card under booster vaccination. His name is recorded on the chip card as Yoshi."},
  {date:"2025-12-11",kind:"flea",title:"De-flea and worming",vet:"Hackney vet",unsure:true},
- {date:"2025-11-04",kind:"vax",title:"Second vaccination",vet:"Icknield Vet Clinic",weight:2.73,
+ {date:"2025-11-24",kind:"vax",title:"Second vaccination",vet:"Icknield Vet Clinic",weight:2.73,
   items:["Nobivac Tricat Trio — lot A476A01, exp 06/2027","Nobivac FeLV — batch 9JXB01, exp 09/2026","Milbemax wormer given"],
   note:"Next dose due November 2026 — that's the annual booster."},
  {date:"2025-10-27",kind:"vax",title:"First vaccination",vet:"Icknield Vet Clinic",weight:1.95,
@@ -493,6 +496,7 @@ const days=iso=>Math.round((new Date(iso+"T12:00:00")-new Date())/864e5);
 /* id card */
 document.getElementById("idcard").innerHTML=[
  ["Microchip",CHIP],["Chip database","BackHome, on PETtrac"],["Lost cat line","01273 408721"],
+ ["Clinic card no.","226"],
  ["Date of birth","23 August 2025"],["Sex","Male, neutered"],["Colour","Lilac and white"],
  ["Vaccination card","Icknield Vet Clinic"],["Also seen by","Hackney vet"]
 ].map(([k,v])=>`<div><b>${k}</b><span>${v}</span></div>`).join("");
