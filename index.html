@@ -175,6 +175,24 @@ body.locked .gate{display:flex}
 #map.picked .tn.lit rect{stroke:var(--coral);stroke-width:3}
 #map.picked .lk{opacity:.12}
 #map.picked .lk.lit{opacity:1;stroke:var(--coral)}
+#cat{position:fixed;right:14px;bottom:14px;z-index:80;width:min(392px,calc(100vw - 28px));max-height:76vh;overflow:auto;
+ background:var(--milk);border:3px solid var(--grape);border-radius:22px;padding:15px 17px 17px;
+ box-shadow:0 20px 44px -14px rgba(51,32,73,.55);transform:translateY(125%);pointer-events:none;
+ transition:transform .34s cubic-bezier(.34,1.56,.64,1)}
+#cat.show{transform:none;pointer-events:auto}
+#catclose{position:absolute;top:10px;right:12px;background:var(--lilac);border:2px solid var(--grape);border-radius:99px;width:30px;height:30px;cursor:pointer;font-size:13px;color:var(--grape);line-height:1}
+.cathead{display:flex;gap:12px;align-items:center;padding-right:34px}
+.catface{width:66px;height:66px;flex:none}
+.catface svg{width:100%;height:100%}
+#cat .rel{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft)}
+#cat h3{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.15rem;margin:2px 0 0;letter-spacing:-.02em;line-height:1.1}
+#cattitle{margin:10px 0 0;font-size:12.5px;color:var(--coral);font-weight:700}
+#cattitle:empty{display:none}
+#catdesc{margin:9px 0 0;font-size:13.5px;color:var(--grape-soft);line-height:1.45}
+.catcode{margin:0;display:grid;gap:7px}
+.catcode div{display:flex;gap:10px;align-items:baseline;background:var(--lilac);border-radius:11px;padding:7px 10px}
+.catcode dt{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--grape);font-weight:400;flex:none;min-width:44px}
+.catcode dd{margin:0;font-size:12.5px;color:var(--grape-soft);line-height:1.35}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
 .stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
 .stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
@@ -301,6 +319,16 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 
 <div id="lightbox" hidden><button id="lbclose" aria-label="Close">✕</button><img id="lbimg" alt=""><p id="lbcap"></p></div>
 
+<aside id="cat" aria-live="polite">
+  <button id="catclose" aria-label="Close">✕</button>
+  <div class="cathead"><div class="catface" id="catface"></div>
+    <div><span class="rel" id="catrel"></span><h3 id="catname"></h3></div></div>
+  <p id="cattitle"></p>
+  <p id="catdesc"></p>
+  <p class="log-h" style="margin:14px 0 6px">What the pedigree says</p>
+  <dl class="catcode" id="catcode"></dl>
+</aside>
+
 <div id="bubble" role="status" aria-live="polite"></div>
 
 <script>
@@ -341,6 +369,8 @@ const T=Object.assign(n("Yoshi Cormac Babaganoush","BRI c 03","Lilac and white b
     dam:n("Grace Dominica Leven Dee","BLH p 03","Fawn and white, longhair",["fawn","white"])})})})
 });
 
+
+
 /* ---------- turning the codes into words ----------
    So a card reads "British Shorthair, lilac, with white patches" instead of
    making you go and look up BRI c 03. Codes we don't recognise (the UK
@@ -369,27 +399,101 @@ const says=node=>plain(node.code)||node.desc;
 /* ---------- cat face ---------- */
 let uid=0;
 function faceInner(node){return face(node).replace(/^<svg[^>]*>/,"").replace(/<\/svg>$/,"");}
+/* Every portrait is built from what the pedigree actually says: the colour
+   letters decide the coat, the white number decides how much white, the tabby
+   number decides the markings, the eye number decides the eyes, and BLH gets a
+   longhair ruff. Anything the codes don't fix — head shape, ear tilt, where the
+   tortie patches fall — is drawn from a hash of the cat's name, so each one is
+   individual but always draws the same way. */
+const EYECOL={"61":"#7FB2E5","62":"#E9A72B","63":"odd","64":"#8FBE63"};
+function hashName(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}return h;}
+function rng(seed){let s=seed>>>0||1;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+function codeMeta(code){
+  const o={longhair:false,white:null,eyes:null,tabby:null};
+  for(const raw of String(code).trim().split(/\s+/)){
+    const k=raw.replace(/[()]/g,"");
+    if(k.toUpperCase()==="BLH")o.longhair=true;
+    else if(WHITE[k])o.white=k;
+    else if(EYES[k])o.eyes=k;
+    else if(TABBYC[k])o.tabby=k;
+  }
+  return o;
+}
 function face(node){
-  const id="c"+(uid++);
+  const id="c"+(uid++), rnd=rng(hashName(node.name)), meta=codeMeta(node.code);
   const solid=node.cols.filter(c=>c!=="white");
-  const base=C[solid[0]]||"#B7A6BC", patch=solid[1]?C[solid[1]]:null, bib=node.cols.includes("white");
+  const base=C[solid[0]]||"#B7A6BC";
+  const second=solid[1]?C[solid[1]]:null;
+  const white=meta.white||(node.cols.includes("white")?"03":null);
+  const tabby=meta.tabby||(node.tabby?"25":null);
+  const eyeL=meta.eyes==="63"?"#7FB2E5":(meta.eyes?EYECOL[meta.eyes]:EYE);
+  const eyeR=meta.eyes==="63"?"#E9A72B":(meta.eyes?EYECOL[meta.eyes]:EYE);
+  const rx=(35+rnd()*3).toFixed(1), ry=(31+rnd()*3).toFixed(1);
+  const tilt=(rnd()*5-2.5).toFixed(1), wsk=(12+rnd()*4).toFixed(1);
+  const ink="#332049";
+
+  /* tortoiseshell: soft mottling rather than one hard split */
+  const tortie=second?Array.from({length:8},()=>{
+    const a=rnd()*6.28, d=rnd()*.8;
+    const cx=(50+Math.cos(a)*rx*d).toFixed(1), cy=(57+Math.sin(a)*ry*d).toFixed(1);
+    return `<ellipse cx="${cx}" cy="${cy}" rx="${(7+rnd()*9).toFixed(1)}" ry="${(6+rnd()*7).toFixed(1)}" fill="${second}" transform="rotate(${(rnd()*180).toFixed(0)} ${cx} ${cy})" opacity=".92"/>`;
+  }).join(""):"";
+
+  /* tabby markings, by type */
+  let marks="";
+  if(tabby){
+    const st=`stroke="${ink}" stroke-opacity=".33" fill="none" stroke-linecap="round"`;
+    const M=`<path d="M40 31 l6 9 M50 28 v10 M60 31 l-6 9" ${st} stroke-width="3"/>`;
+    if(tabby==="25") marks=M+`<g ${st} stroke-width="2">`+Array.from({length:12},()=>{
+        const a=rnd()*6.28,d=.35+rnd()*.5, x=(50+Math.cos(a)*rx*d).toFixed(1), y=(57+Math.sin(a)*ry*d).toFixed(1);
+        return `<path d="M${x} ${y} l${(rnd()*4-2).toFixed(1)} 4"/>`;}).join("")+`</g>`;
+    else if(tabby==="24") marks=M+`<g fill="${ink}" opacity=".28">`+Array.from({length:9},()=>{
+        const a=rnd()*6.28,d=.4+rnd()*.5;
+        return `<ellipse cx="${(50+Math.cos(a)*rx*d).toFixed(1)}" cy="${(57+Math.sin(a)*ry*d).toFixed(1)}" rx="3" ry="2.4"/>`;}).join("")+`</g>`;
+    else if(tabby==="23") marks=M+`<g ${st} stroke-width="2.6"><path d="M22 50 v16 M28 46 v22 M78 50 v16 M72 46 v22"/></g>`;
+    else if(tabby==="22") marks=M+`<g ${st} stroke-width="3"><path d="M20 52 q8 10 0 20 M80 52 q-8 10 0 20"/></g>`;
+    else marks=M;
+  }
+
+  /* how much white the number calls for */
+  const W=C.white;
+  const whiteShape=
+    white==="01"?`<ellipse cx="50" cy="66" rx="${rx}" ry="${ry}" fill="${W}"/><rect x="8" y="52" width="84" height="46" fill="${W}"/>`
+   :white==="02"?`<path d="M50 26 q7 10 9 22 H95 V98 H5 V48 H41 q2-12 9-22Z" fill="${W}"/>`
+   :white==="03"?`<path d="M50 44 q9 0 11 14 q14 4 14 20 v18 H25 v-18 q0-16 14-20 q2-14 11-14Z" fill="${W}"/>`
+   :white?`<ellipse cx="50" cy="82" rx="15" ry="11" fill="${W}"/>`:"";
+
+  /* longhair gets a soft scalloped ruff rather than spikes */
+  const ruff=meta.longhair?(()=>{
+    const N=13,inr=[],out=[];
+    for(let i=0;i<N;i++){
+      const a=(i/N)*6.28,b=((i+.5)/N)*6.28;
+      inr.push(`${(50+Math.cos(a)*rx*.95).toFixed(1)} ${(57+Math.sin(a)*ry*.95).toFixed(1)}`);
+      out.push(`${(50+Math.cos(b)*rx*1.24).toFixed(1)} ${(57+Math.sin(b)*ry*1.24).toFixed(1)}`);
+    }
+    let d=`M${inr[0]}`;
+    for(let i=0;i<N;i++)d+=` Q${out[i]} ${inr[(i+1)%N]}`;
+    return `<path d="${d}Z" fill="${base}" stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  })():"";
+
   return `<svg viewBox="0 0 100 100" aria-hidden="true">
-  <defs><clipPath id="${id}"><ellipse cx="50" cy="57" rx="37" ry="33"/></clipPath></defs>
-  <path d="M17 40 L14 12 L42 27 Z" fill="${base}" stroke="#332049" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M83 40 L86 12 L58 27 Z" fill="${patch||base}" stroke="#332049" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M21 34 L20 20 L36 28 Z" fill="#E9A7B4"/><path d="M79 34 L80 20 L64 28 Z" fill="#E9A7B4"/>
-  <ellipse cx="50" cy="57" rx="37" ry="33" fill="${base}"/>
-  <g clip-path="url(#${id})">
-    ${patch?`<path d="M50 20 L96 20 L96 95 L56 95 Q46 60 50 20Z" fill="${patch}"/>`:""}
-    ${bib?`<path d="M50 44 q9 0 11 14 q14 4 14 20 v18 H25 v-18 q0-16 14-20 q2-14 11-14Z" fill="${C.white}"/>`:""}
-    ${node.tabby?`<g stroke="#332049" stroke-opacity=".35" stroke-width="3" stroke-linecap="round" fill="none"><path d="M40 30 l6 8"/><path d="M50 27 l0 9"/><path d="M60 30 l-6 8"/></g>`:""}
+  <defs><clipPath id="${id}"><ellipse cx="50" cy="57" rx="${rx}" ry="${ry}"/></clipPath></defs>
+  ${ruff}
+  <g transform="rotate(${tilt} 50 57)">
+    <path d="M17 40 L14 12 L42 27 Z" fill="${base}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M83 40 L86 12 L58 27 Z" fill="${second||base}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M21 34 L20 20 L36 28 Z" fill="#E9A7B4"/><path d="M79 34 L80 20 L64 28 Z" fill="#E9A7B4"/>
   </g>
-  <ellipse cx="50" cy="57" rx="37" ry="33" fill="none" stroke="#332049" stroke-width="3"/>
-  <g class="eyes"><circle cx="36" cy="54" r="8.5" fill="${EYE}" stroke="#332049" stroke-width="2.5"/><circle cx="64" cy="54" r="8.5" fill="${EYE}" stroke="#332049" stroke-width="2.5"/></g>
-  <g class="pupils"><ellipse cx="36" cy="54" rx="3.4" ry="5" fill="#332049"/><ellipse cx="64" cy="54" rx="3.4" ry="5" fill="#332049"/></g>
+  <ellipse cx="50" cy="57" rx="${rx}" ry="${ry}" fill="${base}"/>
+  <g clip-path="url(#${id})">${tortie}${marks}${whiteShape}</g>
+  <ellipse cx="50" cy="57" rx="${rx}" ry="${ry}" fill="none" stroke="${ink}" stroke-width="3"/>
+  <g class="eyes"><circle cx="36" cy="54" r="8.5" fill="${eyeL}" stroke="${ink}" stroke-width="2.5"/><circle cx="64" cy="54" r="8.5" fill="${eyeR}" stroke="${ink}" stroke-width="2.5"/></g>
+  <g class="pupils"><ellipse cx="36" cy="54" rx="3.4" ry="5" fill="${ink}"/><ellipse cx="64" cy="54" rx="3.4" ry="5" fill="${ink}"/></g>
   <path d="M46 68 h8 l-4 5 Z" fill="#C96E7E"/>
-  <path d="M50 73 q-5 6 -10 2 M50 73 q5 6 10 2" stroke="#332049" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <g stroke="#332049" stroke-width="2" stroke-linecap="round" opacity=".5"><path d="M14 62 h14 M14 70 h14 M86 62 h-14 M86 70 h-14"/></g></svg>`;
+  <path d="M50 73 q-5 6 -10 2 M50 73 q5 6 10 2" stroke="${ink}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <g stroke="${ink}" stroke-width="2" stroke-linecap="round" opacity=".45" fill="none">
+    <path d="M22 62 q-${wsk} -3 -${(wsk*1.5).toFixed(1)} -6 M22 68 q-${wsk} 2 -${(wsk*1.5).toFixed(1)} 3
+             M78 62 q${wsk} -3 ${(wsk*1.5).toFixed(1)} -6 M78 68 q${wsk} 2 ${(wsk*1.5).toFixed(1)} 3"/></g></svg>`;
 }
 
 /* ---------- collect generations ---------- */
@@ -477,10 +581,48 @@ function mrrp(seed){
     o.connect(f);f.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.35);}catch(e){}
 }
 function say(html){bubble.innerHTML=html;bubble.classList.add("show");clearTimeout(bt);bt=setTimeout(()=>bubble.classList.remove("show"),5200);}
+/* One row per chunk of the code, so you never have to go and look it up. */
+const TITLEWHAT={
+ "CHAMPION":"Champion — the first rung, earned by collecting certificates from judges at shows.",
+ "GR.I.CH":"Grand International Champion — two promotions above a plain Champion on the FIFe ladder (Champion, International Champion, then this).",
+ "TR GR CH":"Grand Champion. The TR in front isn't documented by any registry — most likely \u201cTriple\u201d, carried across from wherever he was first shown.",
+ "IMP":"Imported — brought in from another country's registry. Not a show title at all."
+};
+function codeRows(code){
+  const rows=[];let known=0;
+  for(const raw of String(code).trim().split(/\s+/)){
+    const k=raw.replace(/[()]/g,""),U=k.toUpperCase();
+    if(BREEDS[U]){rows.push([raw,BREEDS[U]+(U==="BLH"?" — the longhaired version of the breed":"")]);known++;}
+    else if(k.length===1&&COLOUR[k.toLowerCase()]){rows.push([raw,"coat colour — "+COLOUR[k.toLowerCase()]]);known++;}
+    else if(WHITE[k]){rows.push([raw,"white markings — "+WHITE[k]]);known++;}
+    else if(EYES[k]){rows.push([raw,"eye colour — "+EYES[k]]);known++;}
+    else if(TABBYC[k]){rows.push([raw,"markings — "+TABBYC[k]]);known++;}
+    else rows.push([raw,null]);
+  }
+  if(!known)return[[code,"Written the UK way, using GCCF breed numbers rather than the continental letter codes. The number is the breed-and-colour combination, not something you can read letter by letter."]];
+  return rows.map(([t,d])=>[t,d||"part of the registry entry"]);
+}
+const catEl=document.getElementById("cat");
+function showCat(node,rel){
+  document.getElementById("catface").innerHTML=face(node);
+  document.getElementById("catrel").textContent=rel;
+  document.getElementById("catname").textContent=node.name;
+  document.getElementById("cattitle").textContent=node.title?(TITLEWHAT[node.title]||node.title):"";
+  const written=node.desc&&node.desc.toLowerCase()!==says(node).toLowerCase()
+    ? ` The certificate writes it as \u201c${node.desc}\u201d.` : "";
+  document.getElementById("catdesc").innerHTML=
+    `${says(node)}.${written} Portrait drawn from those codes — the colours, the amount of white, the markings and the eyes all come off the paperwork.`;
+  document.getElementById("catcode").innerHTML=
+    codeRows(node.code).map(([t,d])=>`<div><dt>${t}</dt><dd>${d}</dd></div>`).join("");
+  catEl.classList.add("show");
+  bubble.classList.remove("show");
+}
+document.getElementById("catclose").onclick=()=>catEl.classList.remove("show");
+addEventListener("keydown",e=>{if(e.key==="Escape")catEl.classList.remove("show")});
+
 function meet(el,node,rel){
   el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");mrrp(node.name.length);
-  bubble.innerHTML=`<b>${node.name}</b> — ${rel==="The boy himself"?"that's you, mate":"Yoshi's "+rel.replace(" · "," on his ")}. ${says(node)}. Written on the pedigree as <b>${node.code}</b>.${node.title?` Carries the title ${node.title}.`:""}`;
-  bubble.classList.add("show");clearTimeout(bt);bt=setTimeout(()=>bubble.classList.remove("show"),5200);
+  showCat(node,rel==="The boy himself"?"The boy himself":"Yoshi's "+rel.replace(" · "," on his "));
 }
 document.getElementById("lucky").onclick=()=>{
   const p=all[Math.floor(Math.random()*all.length)];
@@ -775,8 +917,9 @@ function pick(i){
   }
   mapEl.classList.add("picked");
   const n=tnodes[i];
-  const rel=n.gen===0?"The boy himself":REL[n.gen-1][n.parent&&n.parent.kids[1]===n?1:0];
-  say(`<b>${n.node.name}</b> — ${n.gen?"Yoshi's "+rel.toLowerCase():"that's you, mate"}. ${says(n.node)}.`);
+  mrrp(n.node.name.length);
+  showCat(n.node,n.gen===0?"The boy himself"
+    :"Yoshi's "+REL[n.gen-1][n.parent&&n.parent.kids[1]===n?1:0].toLowerCase());
 }
 document.getElementById("mapsvg").addEventListener("click",e=>{
   const g=e.target.closest(".tn");if(g)pick(+g.dataset.i);});
