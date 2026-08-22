@@ -273,7 +273,8 @@ export function furPanel(node){
     disposeScene(panelSlot.rec);
   }
   host.innerHTML = "<span></span>";
-  panelSlot = { rec: mount(host.firstChild, node, 66, 1.05) };
+  const size = Math.max(56, Math.min(220, Math.round(host.clientWidth) || 66));
+  panelSlot = { rec: mount(host.firstChild, node, size, 1.05) };
   dirty = true;
   return true;
 }

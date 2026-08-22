@@ -175,20 +175,6 @@ body.locked .gate{display:flex}
 #map.picked .tn.lit rect{stroke:var(--coral);stroke-width:3}
 #map.picked .lk{opacity:.12}
 #map.picked .lk.lit{opacity:1;stroke:var(--coral)}
-#cat{position:fixed;right:14px;bottom:14px;z-index:80;width:min(392px,calc(100vw - 28px));max-height:76vh;overflow:auto;
- background:var(--milk);border:3px solid var(--grape);border-radius:22px;padding:15px 17px 17px;
- box-shadow:0 20px 44px -14px rgba(51,32,73,.55);transform:translateY(125%);pointer-events:none;
- transition:transform .34s cubic-bezier(.34,1.56,.64,1)}
-#cat.show{transform:none;pointer-events:auto}
-#catclose{position:absolute;top:10px;right:12px;background:var(--lilac);border:2px solid var(--grape);border-radius:99px;width:30px;height:30px;cursor:pointer;font-size:13px;color:var(--grape);line-height:1}
-.cathead{display:flex;gap:12px;align-items:center;padding-right:34px}
-.catface{width:66px;height:66px;flex:none}
-.catface svg{width:100%;height:100%}
-#cat .rel{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft)}
-#cat h3{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.15rem;margin:2px 0 0;letter-spacing:-.02em;line-height:1.1}
-#cattitle{margin:10px 0 0;font-size:12.5px;color:var(--coral);font-weight:700}
-#cattitle:empty{display:none}
-#catdesc{margin:9px 0 0;font-size:13.5px;color:var(--grape-soft);line-height:1.45}
 .catcode{margin:0;display:grid;gap:7px}
 .catcode div{display:flex;gap:10px;align-items:baseline;background:var(--lilac);border-radius:11px;padding:7px 10px}
 .catcode dt{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--grape);font-weight:400;flex:none;min-width:44px}
@@ -203,6 +189,52 @@ body.locked .gate{display:flex}
 .found li b{color:var(--grape)}
 .src{margin:9px 0 0;font-size:11.5px;color:var(--grape-soft);line-height:1.4}
 .src a{color:var(--coral)}
+/* ---------- the cat as a playing card ---------- */
+#cat{position:fixed;right:14px;bottom:14px;z-index:80;width:min(370px,calc(100vw - 28px));
+ transform:translateY(130%);pointer-events:none;transition:transform .36s cubic-bezier(.34,1.56,.64,1)}
+#cat.show{transform:none;pointer-events:auto}
+#catclose{position:absolute;top:-13px;right:-9px;z-index:3;background:var(--milk);border:2px solid var(--grape);border-radius:99px;width:32px;height:32px;cursor:pointer;font-size:13px;color:var(--grape);line-height:1;box-shadow:0 4px 0 -1px var(--lilac-deep)}
+.pwrap{perspective:1400px}
+.pcard{position:relative;width:100%;aspect-ratio:10/12.6;max-height:62vh;transform-style:preserve-3d;
+ transition:transform .7s cubic-bezier(.4,.05,.2,1)}
+.pcard.flipped{transform:rotateY(180deg)}
+.pface{position:absolute;inset:0;backface-visibility:hidden;border:3px solid var(--grape);border-radius:20px;
+ background:var(--milk);overflow:hidden;box-shadow:0 18px 40px -14px rgba(51,32,73,.55)}
+.pfront{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+.pback{transform:rotateY(180deg);background:var(--milk)}
+.pbackin{position:absolute;inset:0;overflow:auto;padding:18px 17px}
+
+.corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1}
+.corner.tl{top:11px;left:13px}
+.ribbon:not(:empty)~.corner.tl{top:36px}   /* clear the title band */
+.corner.br{bottom:11px;right:13px;transform:rotate(180deg)}
+.corner b{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:23px;color:var(--grape)}
+.corner i{width:13px;height:13px;border-radius:50%;border:2px solid var(--grape);display:block}
+
+.portrait{width:54%;aspect-ratio:1;margin:10px 0 4px}
+.portrait svg,.portrait canvas{width:100%;height:100%;display:block}
+.pinfo{text-align:center;padding:0 6px}
+#cat .rel{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--grape-soft)}
+#cat h3{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.18rem;margin:4px 0 5px;letter-spacing:-.02em;line-height:1.12}
+#cat .pcode{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--grape-soft)}
+.pfront .gen{position:absolute;bottom:13px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--lilac-deep)}
+
+/* titled cats get a gold band and a slow sheen */
+.ribbon{position:absolute;top:0;left:0;right:0;background:var(--marigold);border-bottom:2px solid var(--grape);
+ font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;
+ text-align:center;padding:5px 4px;color:var(--grape)}
+.ribbon:empty{display:none}
+.pcard.titled .pfront{background:linear-gradient(150deg,#FFFCF4 0%,#FFF6DF 45%,#FFFCF4 100%)}
+.pcard.titled .pfront::after{content:'';position:absolute;inset:-40%;pointer-events:none;
+ background:linear-gradient(75deg,transparent 42%,rgba(255,255,255,.75) 50%,transparent 58%);
+ animation:sheen 5.5s ease-in-out infinite}
+@keyframes sheen{0%,72%{transform:translateX(-70%)}100%{transform:translateX(70%)}}
+
+#catflip{margin:10px auto 0;display:block;background:var(--grape);color:var(--milk);border-color:var(--grape)}
+#cattitle{margin:0 0 10px;font-size:12.5px;color:var(--coral);font-weight:700;line-height:1.4}
+#cattitle:empty{display:none}
+#catdesc{margin:0;font-size:13px;color:var(--grape-soft);line-height:1.45}
+@media (max-width:620px){#cat{right:8px;left:8px;bottom:8px;width:auto}.pcard{max-height:70vh}}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
 .stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
 .stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
@@ -332,13 +364,30 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 
 <aside id="cat" aria-live="polite">
   <button id="catclose" aria-label="Close">✕</button>
-  <div class="cathead"><div class="catface" id="catface"></div>
-    <div><span class="rel" id="catrel"></span><h3 id="catname"></h3></div></div>
-  <p id="cattitle"></p>
-  <p id="catdesc"></p>
-  <p class="log-h" style="margin:14px 0 6px">What the pedigree says</p>
-  <dl class="catcode" id="catcode"></dl>
-  <div id="catfound"></div>
+  <div class="pwrap">
+    <div class="pcard" id="pcard">
+      <div class="pface pfront">
+        <span class="ribbon" id="catribbon"></span>
+        <div class="corner tl"><b id="rank1"></b><i id="pip1"></i></div>
+        <div class="corner br"><b id="rank2"></b><i id="pip2"></i></div>
+        <div class="portrait" id="catface"></div>
+        <div class="pinfo">
+          <span class="rel" id="catrel"></span>
+          <h3 id="catname"></h3>
+          <span class="pcode" id="pcode"></span>
+        </div>
+        <span class="gen" id="catgen"></span>
+      </div>
+      <div class="pface pback"><div class="pbackin">
+        <p id="cattitle"></p>
+        <p id="catdesc"></p>
+        <p class="log-h" style="margin:14px 0 6px">What the pedigree says</p>
+        <dl class="catcode" id="catcode"></dl>
+        <div id="catfound"></div>
+      </div></div>
+    </div>
+  </div>
+  <button class="pill" id="catflip" aria-pressed="false">Turn it over ↻</button>
 </aside>
 
 <div id="bubble" role="status" aria-live="polite"></div>
@@ -635,15 +684,41 @@ const FOUND={
     "That line is noted as carrying the cinnamon gene."]}
 };
 const catEl=document.getElementById("cat");
-function showCat(node,rel){
+/* The rank in the corner is the cat's colour letter, the pip is that colour
+   painted, and the band across the top is the title. Everything on the face
+   comes from the pedigree; the back carries the reading of it. */
+function rankOf(node){
+  const toks=String(node.code).trim().split(/\s+/).map(x=>x.replace(/[()]/g,""));
+  for(const k of toks) if(k.length===1&&COLOUR[k.toLowerCase()])return k.toUpperCase();
+  for(const k of toks) if(/^\d/.test(k))return k;      /* the UK side numbers instead */
+  return "·";
+}
+function showCat(node,rel,gen){
+  const pcard=document.getElementById("pcard");
+  pcard.classList.remove("flipped");
+  document.getElementById("catflip").setAttribute("aria-pressed","false");
+
   if(!(window.FURPANEL&&window.FURPANEL(node)))document.getElementById("catface").innerHTML=face(node);
+
+  const rank=rankOf(node), swatch=C[node.cols.filter(c=>c!=="white")[0]]||"#B7A6BC";
+  for(const n of [1,2]){
+    document.getElementById("rank"+n).textContent=rank;
+    document.getElementById("pip"+n).style.background=swatch;
+  }
+  document.getElementById("catribbon").textContent=node.title?(node.title==="IMP"?"Imported":node.title):"";
+  pcard.classList.toggle("titled",!!node.title&&node.title!=="IMP");
   document.getElementById("catrel").textContent=rel;
   document.getElementById("catname").textContent=node.name;
+  document.getElementById("pcode").textContent=node.code;
+  const depth=["Born 23 August 2025","One generation back","Two generations back",
+               "Three generations back","Four generations back"];
+  document.getElementById("catgen").textContent=gen===undefined?"":depth[gen]||"";
+
   document.getElementById("cattitle").textContent=node.title?(TITLEWHAT[node.title]||node.title):"";
   const written=node.desc&&node.desc.toLowerCase()!==says(node).toLowerCase()
-    ? ` The certificate writes it as \u201c${node.desc}\u201d.` : "";
+    ? ` The certificate writes it as “${node.desc}”.` : "";
   document.getElementById("catdesc").innerHTML=
-    `${says(node)}.${written} Portrait drawn from those codes — the colours, the amount of white, the markings and the eyes all come off the paperwork.`;
+    `${says(node)}.${written} The portrait is drawn from those codes — colours, amount of white, markings and eyes all come off the paperwork.`;
   document.getElementById("catcode").innerHTML=
     codeRows(node.code).map(([t,d])=>`<div><dt>${t}</dt><dd>${d}</dd></div>`).join("");
   const f=FOUND[node.name];
@@ -652,15 +727,23 @@ function showCat(node,rel){
        <ul class="found">${f.facts.map(x=>`<li>${x}</li>`).join("")}</ul>
        <p class="src">From ${f.src} — <a href="${f.url}" target="_blank" rel="noopener">see it</a>.
         Not on Yoshi's certificate, so treat it as a lead rather than gospel.</p>` : "";
+
   catEl.classList.add("show");
   bubble.classList.remove("show");
 }
+document.getElementById("catflip").onclick=()=>{
+  const c=document.getElementById("pcard"), on=!c.classList.contains("flipped");
+  c.classList.toggle("flipped",on);
+  document.getElementById("catflip").setAttribute("aria-pressed",String(on));
+  document.getElementById("catflip").textContent=on?"Turn it back ↺":"Turn it over ↻";
+};
 document.getElementById("catclose").onclick=()=>catEl.classList.remove("show");
 addEventListener("keydown",e=>{if(e.key==="Escape")catEl.classList.remove("show")});
 
 function meet(el,node,rel){
   el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");mrrp(node.name.length);
-  showCat(node,rel==="The boy himself"?"The boy himself":"Yoshi's "+rel.replace(" · "," on his "));
+  showCat(node,rel==="The boy himself"?"The boy himself":"Yoshi's "+rel.replace(" · "," on his "),
+    all.find(a=>a.node===node)?GENS.findIndex(g=>g.label&&rows[GENS.indexOf(g)].some(r=>r.node===node)):undefined);
 }
 document.getElementById("lucky").onclick=()=>{
   const p=all[Math.floor(Math.random()*all.length)];
@@ -958,7 +1041,7 @@ function pick(i){
   const n=tnodes[i];
   mrrp(n.node.name.length);
   showCat(n.node,n.gen===0?"The boy himself"
-    :"Yoshi's "+REL[n.gen-1][n.parent&&n.parent.kids[1]===n?1:0].toLowerCase());
+    :"Yoshi's "+REL[n.gen-1][n.parent&&n.parent.kids[1]===n?1:0].toLowerCase(),n.gen);
 }
 document.getElementById("mapsvg").addEventListener("click",e=>{
   const g=e.target.closest(".tn");if(g)pick(+g.dataset.i);});
