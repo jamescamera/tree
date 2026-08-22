@@ -64,6 +64,25 @@ Two things to know:
   counts are public. Low stakes for a cat, but it's true regardless of the
   password gate — the gate can't hide a file the site has to fetch.
 
+### The two scales disagree
+
+The box scale and the vet's scale won't agree exactly. Rather than hardcode a
+correction, the page measures the gap: it takes the most recent vet weigh-in in
+`LOG` and averages the box readings within ten days of it, then reports the
+difference and draws the vet's figure as a dashed line across the box-scale
+chart.
+
+That means the vet weight chart stays vet-only — entries tagged
+`source:"scale"` are kept out of it, because averaging two instruments into one
+trend line hides the very disagreement worth seeing. Add a fresh vet weight to
+`LOG` and the comparison re-derives itself.
+
+Whisker's own advice when readings look off: stand the unit on a firm level
+floor, keep the litter mat fully in front rather than tucked underneath, leave
+clearance on all sides, clear debris from the feet, wipe the sensor bezel, and
+press Reset afterwards. A cat putting weight on the step without fully entering
+also gives a partial reading.
+
 ### If the weights look wrong
 
 The Whisker API returns pounds, so the script converts. If the site shows

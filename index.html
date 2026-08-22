@@ -450,8 +450,10 @@ document.getElementById("bigcat").addEventListener("click",e=>{
    ================================================================ */
 const CHIP="953010007498685";
 const LOG=[
- {date:"2026-08-21",kind:"weigh",title:"SmartScale reading — 4.8 kg",vet:"Litter-Robot 4",weight:4.8,
+ {date:"2026-08-21",kind:"weigh",title:"Box scale reading — 4.8 kg",vet:"Litter-Robot 4",weight:4.8,source:"scale",
   note:"Off the Whisker app. Steady at 4.8 kg all week, 11 trips to the box over the week — an average of about 1.6 a day."},
+ {date:"2026-08-17",kind:"vet",title:"Vet weigh-in — 4.6 kg",weight:4.6,approx:true,
+  note:"The vet's scale, and the reference the box scale gets checked against. Exact date to confirm."},
  {date:"2026-08-03",kind:"worm",title:"Wormer",vet:"Icknield Vet Clinic"},
  {date:"2026-05-15",kind:"worm",title:"Wormer",approx:true,
   note:"Remembered rather than written down — somewhere around May 2026. Worth nailing the date down with the vet."},
@@ -504,7 +506,9 @@ document.getElementById("due").innerHTML=DUE.map(d=>{
 
 /* weight chart */
 function chart(entries){
-  const pts=entries.filter(e=>e.weight).map(e=>({d:new Date(e.date+"T12:00:00"),w:+e.weight}))
+  /* box-scale readings live in the Litter-Robot panel; mixing two scales in
+     one trend line hides exactly the disagreement we care about */
+  const pts=entries.filter(e=>e.weight&&e.source!=="scale").map(e=>({d:new Date(e.date+"T12:00:00"),w:+e.weight}))
     .sort((a,b)=>a.d-b.d);
   const box=document.getElementById("chart");
   if(pts.length<2){box.style.display="none";return;}
@@ -537,7 +541,7 @@ function renderLog(){
     const k=KIND[e.kind]||KIND.note;
     const tags=[`<span class="tag">${k.l}</span>`];
     if(e.vet)tags.push(`<span class="tag">${esc(e.vet)}</span>`);
-    if(e.weight)tags.push(`<span class="tag w">${e.weight} kg</span>`);
+    if(e.weight)tags.push(`<span class="tag w">${e.weight} kg${e.source==="scale"?" · box scale":""}</span>`);
     if(e.unsure)tags.push(`<span class="tag q">handwriting unclear</span>`);
     if(e.local)tags.push(`<span class="tag q">this device only</span>`);
     return `<li class="entry${e.local?" mine":""}"><span class="ico">${k.i}</span><div class="body">
@@ -594,10 +598,13 @@ function bars(days){
         ${days.length<=16||i%2===0?`<text x="${cx.toFixed(1)}" y="${H-10}" font-size="9.5" font-family="IBM Plex Mono,monospace" fill="#7A6A93" text-anchor="middle">${d.lbl}</text>`:""}`;}).join("")}
   </svg>`;
 }
-function spark(pts){
+function spark(pts,ref){
   const W=600,H=150,L=34,R=14,T=16,B=24;
   const x0=+pts[0].d,x1=+pts[pts.length-1].d;
-  const lo=Math.min(...pts.map(p=>p.w)),hi=Math.max(...pts.map(p=>p.w));
+  /* keep the vet's reading inside the plotted band, otherwise the line
+     it should be compared against silently falls off the chart */
+  const vals=pts.map(p=>p.w).concat(ref!=null?[ref]:[]);
+  const lo=Math.min(...vals),hi=Math.max(...vals);
   const pad=(hi-lo)*.3||.25;
   const X=d=>L+(W-L-R)*((+d-x0)/((x1-x0)||1));
   const Y=w=>T+(H-T-B)*(1-((w-(lo-pad))/((hi+pad)-(lo-pad))));
@@ -606,8 +613,24 @@ function spark(pts){
     `<circle cx="${X(p.d).toFixed(1)}" cy="${Y(p.w).toFixed(1)}" r="5" fill="#F8C13C" stroke="#332049" stroke-width="2.5"/>
      <text x="${X(p.d).toFixed(1)}" y="${(Y(p.w)-11).toFixed(1)}" font-size="11" font-family="IBM Plex Mono,monospace" fill="#332049" text-anchor="${a}">${p.w} kg</text>
      <text x="${X(p.d).toFixed(1)}" y="${H-7}" font-size="9.5" font-family="IBM Plex Mono,monospace" fill="#7A6A93" text-anchor="${a}">${MON[p.d.getMonth()]} ${p.d.getDate()}</text>`).join("");
+  const refLine=ref!=null&&ref>lo-pad&&ref<hi+pad
+    ?`<line x1="${L}" y1="${Y(ref).toFixed(1)}" x2="${W-R}" y2="${Y(ref).toFixed(1)}" stroke="#332049" stroke-width="2" stroke-dasharray="6 5" opacity=".55"/>
+      <text x="${L}" y="${(Y(ref)-6).toFixed(1)}" font-size="10" font-family="IBM Plex Mono,monospace" fill="#332049" opacity=".7">vet ${ref} kg</text>`:"";
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Weight from the litter box scale, ${pts[0].w} to ${pts[pts.length-1].w} kg">
-    <path d="${line}" fill="none" stroke="#F2685C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${ends}</svg>`;
+    ${refLine}<path d="${line}" fill="none" stroke="#F2685C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${ends}</svg>`;
+}
+/* How far the box scale sits from the vet's, measured rather than assumed:
+   take the most recent vet weigh-in and the box readings either side of it. */
+function calibration(rs){
+  const vet=LOG.filter(e=>e.weight&&e.source!=="scale")
+    .sort((a,b)=>b.date.localeCompare(a.date))[0];
+  if(!vet)return null;
+  const vd=new Date(vet.date+"T12:00:00");
+  const near=rs.filter(r=>Math.abs(r.t-vd)<10*DAY);
+  if(near.length<2)return null;
+  const box=near.reduce((t,r)=>t+r.kg,0)/near.length;
+  return {vetKg:+vet.weight,date:vet.date,boxKg:+box.toFixed(2),
+          gap:+(box-vet.weight).toFixed(2),n:near.length};
 }
 function renderLitter(pet,updated){
   const rs=(pet.readings||[]).map(r=>({t:new Date(r.t),kg:r.kg})).filter(r=>!isNaN(r.t));
@@ -629,18 +652,25 @@ function renderLitter(pet,updated){
     .map(([k,r])=>({d:new Date(k+"T12:00:00"),w:r.kg}));
   const recent=dayKgs.slice(-60);
 
+  const cal=calibration(rs);
   const tiles=[
-    [last.kg+"<i> kg</i>","Latest weight"],
+    [last.kg+"<i> kg</i>","Latest, box scale"],
+    ...(cal?[[(cal.gap>0?"+":"")+cal.gap+"<i> kg</i>","Vs the vet's scale"]]:[]),
     [week.length,"Visits, last 7 days"],
     [(week.length/7).toFixed(1),"Visits a day"],
     [spanDays+"<i> d</i>","History kept"]
   ].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+  const calNote=cal&&Math.abs(cal.gap)>=0.1
+    ? `<p class="hint" style="margin:0 0 12px">Around ${fmt({date:cal.date})} the vet made him <b>${cal.vetKg} kg</b> while the box averaged
+       <b>${cal.boxKg} kg</b> over ${cal.n} readings — the box reads about <b>${Math.abs(cal.gap)} kg ${cal.gap>0?"heavy":"light"}</b>.
+       Treat the shape of the line as the useful bit, not the absolute number.</p>` : "";
 
   return `<div class="litter-head"><h3>Litter-Robot</h3>
       <span class="stamp">last reading ${fmt({date:last.t.toISOString().slice(0,10)})}${updated?` · synced ${fmt({date:updated.slice(0,10)})}`:""}</span></div>
     <div class="stats">${tiles}</div>
+    ${calNote}
     <div class="chart"><h3>Trips to the box — last 14 days</h3>${bars(days)}</div>
-    ${recent.length>1?`<div class="chart" style="margin-top:10px"><h3>Weight off the box scale</h3>${spark(recent)}</div>`:""}`;
+    ${recent.length>1?`<div class="chart" style="margin-top:10px"><h3>Weight off the box scale</h3>${spark(recent,cal?cal.vetKg:null)}</div>`:""}`;
 }
 fetch("data/litter.json",{cache:"no-store"})
   .then(r=>r.ok?r.json():null)
