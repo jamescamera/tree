@@ -101,3 +101,22 @@ WHISKER_EMAIL=you@example.com WHISKER_PASSWORD=... python scripts/litter_sync.py
 pylitterbot is an unofficial client for an API Whisker doesn't publish, so it
 can break when they change something. If the job starts failing, check for a
 newer pylitterbot release first.
+
+## The 3D cats
+
+`fur.js` replaces the flat portraits with furry 3D heads, drawn with
+[three.js](https://threejs.org) (MIT, vendored in `vendor/` so the site has no
+CDN dependency). No third-party model is used — each cat is built from
+primitives and its coat is painted from the same pedigree codes the flat
+portraits read, so the colour, the amount of white, the markings and the eyes
+all still come off the paperwork.
+
+The fur is done with shells: the head is drawn a dozen times, each copy pushed
+a little further out along its normals with more of it dissolved away, which
+reads as fur. One WebGL canvas floats over the page and every cat currently on
+screen is drawn into its own scissored rectangle of it, so cats scrolled out of
+view cost nothing.
+
+The **Fur on/off** button switches back to the flat SVG portraits, which say
+more at small sizes; the choice is remembered per device. If WebGL is missing
+or anything throws, the flat portraits are left exactly as they were.
