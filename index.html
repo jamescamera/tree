@@ -441,6 +441,8 @@ document.getElementById("bigcat").addEventListener("click",e=>{
    ================================================================ */
 const CHIP="953010007498685";
 const LOG=[
+ {date:"2026-08-21",kind:"weigh",title:"SmartScale reading — 4.8 kg",vet:"Litter-Robot 4",weight:4.8,
+  note:"Off the Whisker app. Steady at 4.8 kg all week, 11 trips to the box over the week — an average of about 1.6 a day."},
  {date:"2026-08-03",kind:"worm",title:"Wormer",vet:"Icknield Vet Clinic"},
  {date:"2026-05-15",kind:"worm",title:"Wormer",approx:true,
   note:"Remembered rather than written down — somewhere around May 2026. Worth nailing the date down with the vet."},
@@ -509,7 +511,7 @@ function chart(entries){
   let lastLbl=-1e9; const showLbl=i=>{const x=X(pts[i].d);
     if(i===0||i===pts.length-1||x-lastLbl>=58){lastLbl=x;return true}return false};
   const dots=pts.map((p,i)=>`<circle cx="${X(p.d).toFixed(1)}" cy="${Y(p.w).toFixed(1)}" r="5" fill="#F8C13C" stroke="#332049" stroke-width="2.5"/>
-    <text x="${X(p.d).toFixed(1)}" y="${(Y(p.w)-11).toFixed(1)}" font-size="11" font-family="IBM Plex Mono,monospace" fill="#332049" text-anchor="${anc(i)}">${p.w}</text>
+    <text x="${X(p.d).toFixed(1)}" y="${(Y(p.w)+(i===0&&pts.length>1&&pts[1].w>p.w?17:-11)).toFixed(1)}" font-size="11" font-family="IBM Plex Mono,monospace" fill="#332049" text-anchor="${anc(i)}">${p.w}</text>
     ${showLbl(i)?`<text x="${X(p.d).toFixed(1)}" y="${H-8}" font-size="10" font-family="IBM Plex Mono,monospace" fill="#7A6A93" text-anchor="${anc(i)}">${MON[p.d.getMonth()]} ${String(p.d.getFullYear()).slice(2)}</text>`:""}`).join("");
   box.innerHTML=`<h3>Weight — ${pts[0].w} kg to ${pts[pts.length-1].w} kg</h3>
    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Yoshi's weight over time, ${pts.map(p=>p.w+' kg').join(', ')}">
