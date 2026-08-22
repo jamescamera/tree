@@ -53,11 +53,11 @@ h1 span{color:var(--coral)}
 .gen-head h2{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:clamp(1.4rem,4vw,2rem);margin:0;letter-spacing:-.02em;font-variation-settings:'SOFT' 90,'WONK' 1}
 .gen-head .count{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grape-soft)}
 .gen-note{margin:2px 0 18px;color:var(--grape-soft);font-size:13.5px;max-width:52ch}
-.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:16px}
 .pair{background:rgba(255,252,244,.5);border:2px dotted var(--lilac-deep);border-radius:18px;padding:11px}
 .pair-label{margin:0 0 9px;font-size:11.5px;color:var(--grape-soft);font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
 .pair-label b{color:var(--grape);font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:0}
-.duo{display:grid;gap:8px}
+.duo{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
 
 /* cat card */
 .card{width:100%;background:var(--milk);border:2px solid var(--grape);border-radius:14px;padding:8px 10px;display:flex;gap:10px;align-items:center;cursor:pointer;text-align:left;transition:opacity .25s ease,transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s ease}
@@ -66,7 +66,7 @@ h1 span{color:var(--coral)}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.07) rotate(1.5deg)}100%{transform:scale(1)}}
 .card svg{width:48px;height:48px;flex:none}
 .card>div{min-width:0}
-.card .name,.card .desc,.card .rel{overflow-wrap:anywhere}
+.card .name,.card .desc,.card .rel{overflow-wrap:break-word}
 .card .rel{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--grape-soft);display:block;margin-bottom:2px}
 .card .name{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:14.5px;line-height:1.15;display:block}
 .card .title{display:block;color:var(--coral);font-size:9.5px;font-family:'IBM Plex Mono',monospace;letter-spacing:.08em}
@@ -139,6 +139,11 @@ body.locked .gate{display:flex}
 .addbox button{border:2px solid var(--grape);background:var(--grape);color:var(--milk);border-radius:99px;padding:8px 16px;font-size:13.5px;font-weight:700;cursor:pointer}
 .addbox button.ghost{background:var(--milk);color:var(--grape)}
 .hint{font-size:12px;color:var(--grape-soft);margin:10px 0 0}
+.decode{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:10px;margin:0 0 18px}
+.decode div{background:var(--milk);border:2px solid var(--grape);border-radius:14px;padding:10px 13px}
+.decode dt{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:var(--coral);font-weight:400}
+.decode dd{margin:3px 0 0;font-size:13px;color:var(--grape-soft);line-height:1.4}
+.decode dd b{color:var(--grape)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
 .stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
 .stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
@@ -147,7 +152,7 @@ body.locked .gate{display:flex}
 .litter-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:24px 0 10px}
 .litter-head h3{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.3rem;margin:0;letter-spacing:-.02em}
 .litter-head .stamp{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--grape-soft)}
-@media (min-width:620px){.duo{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+
 @media (max-width:620px){.pairs{grid-template-columns:1fr}header{padding:24px 0 4px;gap:18px}.bigcat{width:118px;height:118px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -233,6 +238,20 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
   </details>
 </section>
 
+
+<section class="gen" id="decoder">
+  <div class="gen-head"><h2>What the paperwork means</h2></div>
+  <p class="gen-note">Yoshi's pedigree runs across two different systems, because his mum's side was
+    registered in the UK and his dad's side on the continent. Here's how to read both.</p>
+
+  <p class="log-h">Titles, in front of a name</p>
+  <dl class="decode" id="titles"></dl>
+
+  <p class="log-h">The codes after a name</p>
+  <dl class="decode" id="codes"></dl>
+  <p class="hint">So <b>BRI c 03</b> — Yoshi's own code — reads as British Shorthair, lilac, bi-colour.</p>
+</section>
+
 <footer>Health log transcribed from his Icknield Vet Clinic vaccination card. Pedigree transcribed from Yoshi's pedigree certificate. Coat colours come from the EMS codes on the document — bi-colours get a white bib, torties get a patch down one side, and Windymeadow Fleetwood Mac gets his tabby stripes. Names in coral carry championship titles, exactly as printed in red on the original.</footer>
 </div>
 
@@ -270,7 +289,7 @@ const T=Object.assign(n("Yoshi Cormac Babaganoush","BRI c 03","Lilac and white b
   dam:Object.assign(n("Makdissy Angelica","BRI g 03","Blue-cream and white",["blue","cream","white"]),{
    sire:Object.assign(n("Ushiko of Kotoffski","BSH a","Blue",["blue"]),{
     sire:n("Bonaparte vom Kupferstich","BRI p","Fawn",["fawn"],"GR.I.CH"),
-    dam:n("Langewald Magic Future Star","BRI f","Black tortie",["black","red"],"LV*")}),
+    dam:n("LV*Langewald Magic Future Star","BRI f","Black tortie",["black","red"])}),
    dam:Object.assign(n("Yasmin British Flowering","BRI g 02","Blue-cream and white",["blue","cream","white"],"CHAMPION"),{
     sire:n("Baset-A-Tet Gummybear","BRI e 02","Cream and white",["cream","white"]),
     dam:n("Grace Dominica Leven Dee","BLH p 03","Fawn and white, longhair",["fawn","white"])})})})
@@ -352,11 +371,11 @@ GENS.forEach((g,gen)=>{
 
 /* nav */
 const nav=document.getElementById("nav");
-nav.innerHTML=GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a>`;
+nav.innerHTML=GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a><a href="#decoder">📖 Decoder</a>`;
 const links=[...nav.querySelectorAll("a")];
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)
   links.forEach(l=>l.classList.toggle("on",l.getAttribute("href")==="#"+e.target.id));});},{rootMargin:"-20% 0px -70%"});
-GENS.forEach(g=>io.observe(document.getElementById(g.id)));io.observe(document.getElementById("health"));
+GENS.forEach(g=>io.observe(document.getElementById(g.id)));io.observe(document.getElementById("health"));io.observe(document.getElementById("decoder"));
 
 /* colour trace */
 let filter=null;
@@ -455,8 +474,10 @@ const CHIP="953010007498685";
 const LOG=[
  {date:"2026-08-21",kind:"weigh",title:"Box scale reading — 4.8 kg",vet:"Litter-Robot 4",weight:4.8,source:"scale",
   note:"Off the Whisker app. Steady at 4.8 kg all week, 11 trips to the box over the week — an average of about 1.6 a day."},
- {date:"2026-08-22",kind:"vet",title:"Vet weigh-in — 4.6 kg",weight:4.6,
-  note:"The vet's scale, and the reference the box scale gets checked against."},
+ {date:"2026-08-22",kind:"vet",title:"Consultation at the Hackney Vet",vet:"The Hackney Vet",weight:4.6,
+  items:["Consultation with Harry Wakeman MRCVS","Laboratory work, done in the clinic",
+   "Gabapentin 25mg (beef) — 14 tablets","Katkor non-absorbent litter — the sort used to catch a urine sample at home"],
+  note:"Weighed 4.6 kg on the vet's own scale, which is what the Litter-Robot gets checked against. Invoice 15264867RX, £131.10, paid."},
  {date:"2026-08-03",kind:"worm",title:"Wormer",vet:"Icknield Vet Clinic"},
  {date:"2026-05-15",kind:"worm",title:"Wormer",approx:true,
   note:"Remembered rather than written down — somewhere around May 2026. Worth nailing the date down with the vet."},
@@ -581,6 +602,26 @@ document.getElementById("copyout").onclick=()=>{
     .then(()=>say("Copied — paste it to Claude, or into the <b>LOG</b> list in index.html."))
     .catch(()=>{prompt("Copy this into the LOG list in index.html:",txt);});
 };
+
+/* ---------------- the decoder ---------------- */
+const TITLES=[
+ ["CHAMPION","The first rung. A cat earns it by collecting certificates from judges at shows. <b>Yasmin British Flowering</b>, Yoshi's great-great-nan, carries it."],
+ ["GR.I.CH","<b>Grand International Champion</b>, on the FIFe ladder: Champion, then International Champion, then this. Two promotions above a plain champion. That's <b>Bonaparte vom Kupferstich</b>, the fawn great-great-grandad."],
+ ["GR CH","<b>Grand Champion</b> — the rung above Champion. <b>Kastanjeback's Fraskudde</b> has it, with a two-letter prefix in front that we haven't been able to pin down; it's likely a registry or country marker."],
+ ["IMP","Not a show title at all — short for <b>imported</b>, meaning the cat was brought in from another country's registry. <b>Blue Generations Wild Angel</b> is the import."],
+ ["LV*","Also not a title. FIFe puts a country code and an asterisk in front of a cattery's name, so <b>LV*Langewald</b> simply means the Langewald cattery is registered in Latvia."]
+];
+const CODES=[
+ ["BRI / BSH / BLH","The breed. BRI and BSH are both British Shorthair — different registries write it differently. BLH is British Longhair, which is where <b>Grace Dominica Leven Dee</b> comes in."],
+ ["a b c d e","The colour, in one letter. <b>a</b> blue, <b>b</b> chocolate, <b>c</b> lilac, <b>d</b> red, <b>e</b> cream. Yoshi is a <b>c</b>."],
+ ["f g j q p","Tortoiseshells and the rarer colours. <b>f</b> black tortie, <b>g</b> blue-cream, <b>j</b> lilac tortie, <b>q</b> cinnamon tortie, <b>p</b> fawn."],
+ ["01 02 03","How much white. <b>01</b> van (almost all white), <b>02</b> harlequin (mostly white), <b>03</b> bi-colour. Yoshi's <b>03</b> is why he has the white bib."],
+ ["62","Eye colour, when someone bothers to record it. <b>62</b> is orange or copper eyes — <b>Ronaldo Olivia Charm</b>, Yoshi's dad, has it written down."],
+ ["15c · 16 · 15 45c","The UK system on his mum's side, which uses numbers instead of letters. These are GCCF breed numbers rather than the continental EMS codes, which is why they look nothing alike."]
+];
+const decodeInto=(id,rows)=>document.getElementById(id).innerHTML=
+  rows.map(([t,d])=>`<div><dt>${t}</dt><dd>${d}</dd></div>`).join("");
+decodeInto("titles",TITLES);decodeInto("codes",CODES);
 
 /* ---------------- Litter-Robot ----------------
    data/litter.json is written once a day by the GitHub Action in
