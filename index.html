@@ -194,9 +194,7 @@ body.locked .gate{display:flex}
 .catcode dt{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--grape);font-weight:400;flex:none;min-width:44px}
 .catcode dd{margin:0;font-size:12.5px;color:var(--grape-soft);line-height:1.35}
 /* the 3D cats draw into one canvas floating over the page */
-#furgl{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
-.fur-slot{width:48px;height:48px;flex:none}
-.fur-slot svg{width:100%;height:100%}
+.fur-flat svg{width:100%;height:100%;display:block}
 .bigcat.fur-slot{width:160px;height:160px}
 #catface>div{width:100%;height:100%}
 @media (max-width:620px){.bigcat.fur-slot{width:118px;height:118px}}
@@ -253,7 +251,7 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 <div class="controls">
   <button class="pill shout" id="lucky">🎲 Meet a random ancestor</button>
   <button class="pill" id="sound" aria-pressed="true">🔊 Meows on</button>
-  <button class="pill" id="fur3d" aria-pressed="true" hidden>🧶 Fur on</button>
+  <button class="pill" id="fur3d" aria-pressed="false" hidden>🧶 Try 3D fur</button>
   <span class="grp-label">Where did the colours come from? Tap one to trace it</span>
   <div class="controls" id="legend" style="margin:0;gap:6px"></div>
 </div>
@@ -1098,8 +1096,8 @@ window.FUR={C,codeMeta,hashName,rng,EYECOL,all,root:T};
   if(furReplace()){
     window.FURPANEL=furPanel;
     const btn=document.getElementById("fur3d");
-    let on=true; try{on=localStorage.getItem("yoshi.fur")!=="0"}catch(e){}
-    const paint=()=>{btn.setAttribute("aria-pressed",String(on));btn.textContent=on?"🧶 Fur on":"🧶 Fur off";};
+    let on=false; try{on=localStorage.getItem("yoshi.fur")==="1"}catch(e){}
+    const paint=()=>{btn.setAttribute("aria-pressed",String(on));btn.textContent=on?"🧶 3D fur on":"🧶 Try 3D fur";};
     btn.hidden=false;paint();
     btn.onclick=()=>{on=!on;furSet(on);paint();};
   }

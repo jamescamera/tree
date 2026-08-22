@@ -8,9 +8,12 @@
    each copy dissolved away the further out it sits. Stack those and the eye
    reads it as fur.
 
-   One WebGL canvas floats over the whole page. Every cat that is currently on
-   screen gets drawn into its own scissored rectangle of that canvas, lined up
-   with the slot it belongs to; anything scrolled off screen costs nothing.
+   Each cat lives in its own small canvas sitting in normal page flow, so
+   scrolling moves them with their cards natively - no overlay chasing the
+   scroll position, which is what made them flicker. A single offscreen WebGL
+   canvas renders one cat at a time and the result is blitted into whichever
+   slot needs it. Frames are only drawn when something actually changes (the
+   pointer moved, or a cat is mid-blink), so scrolling costs nothing at all.
 
    If WebGL is missing, or anything in here throws, the flat SVG portraits are
    left exactly as they were.
@@ -198,8 +201,8 @@ function buildCat(node){
   return { group: g, eyes };
 }
 
-const px = { x: innerWidth / 2, y: innerHeight / 2 };
-addEventListener("pointermove", e => { px.x = e.clientX; px.y = e.clientY; }, { passive: true });
+const px = { x: innerWidth / 2, y: innerHeight / 2, moved: 0 };
+addEventListener("pointermove", e => { px.x = e.clientX; px.y = e.clientY; px.moved++; }, { passive: true });
 
 function makeScene(node, scale){
   const scene = new THREE.Scene();
@@ -212,10 +215,19 @@ function makeScene(node, scale){
   return { scene, cat };
 }
 
-let enabled = true;
-function adopt(el, node, scale){
+let enabled = true, gl = null, dirty = true;
+
+/* swap an SVG portrait for a canvas of the same size, sitting in normal flow */
+function mount(target, node, cssSize, scale){
+  const canvas = document.createElement("canvas");
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  canvas.width = canvas.height = Math.round(cssSize * dpr);
+  canvas.style.cssText = `width:${cssSize}px;height:${cssSize}px;flex:none;display:block`;
+  canvas.className = "fur-slot";
+  target.replaceWith(canvas);
   const { scene, cat } = makeScene(node, scale);
-  const rec = { el, node, scene, cat, blinkAt: performance.now() + 1200 + Math.random() * 4200, blinkUntil: 0 };
+  const rec = { canvas, ctx: canvas.getContext("2d"), node, scene, cat,
+                blinkAt: performance.now() + 1500 + Math.random() * 5000, blinkUntil: 0, ease: 1 };
   scenes.push(rec);
   return rec;
 }
@@ -230,17 +242,25 @@ function disposeScene(rec){
   });
 }
 
-/* the detail panel swaps between cats, so it gets its own slot */
 /* Flat portraits say more at a glance, so 3D is a switch rather than a
    one-way door. Off puts the SVG faces straight back. */
 export function furSet(on){
+  if (on && !mountAll()) return;
   if (!renderer) return;
-  enabled = on;
-  renderer.domElement.style.display = on ? "" : "none";
+  enabled = on; dirty = true;
   document.body.classList.toggle("furry", on);
   for (const s of scenes) {
     if (panelSlot && s === panelSlot.rec) continue;
-    s.el.innerHTML = on ? "" : window.face(s.node);
+    s.canvas.style.display = on ? "block" : "none";
+    if (!on && !s.svg) {
+      s.svg = document.createElement("span");
+      s.svg.className = "fur-flat";
+      s.svg.style.cssText = `display:block;flex:none;width:${s.canvas.style.width};height:${s.canvas.style.height}`;
+      s.svg.innerHTML = window.face(s.node);
+      s.canvas.after(s.svg);
+    } else if (s.svg) {
+      s.svg.style.display = on ? "none" : "";
+    }
   }
   try { localStorage.setItem("yoshi.fur", on ? "1" : "0"); } catch (e) {}
 }
@@ -252,95 +272,100 @@ export function furPanel(node){
     scenes.splice(scenes.indexOf(panelSlot.rec), 1);
     disposeScene(panelSlot.rec);
   }
-  host.innerHTML = "";
-  const slot = document.createElement("div");
-  slot.style.cssText = "width:100%;height:100%";
-  host.appendChild(slot);
-  panelSlot = { rec: adopt(slot, node, 1.05) };
+  host.innerHTML = "<span></span>";
+  panelSlot = { rec: mount(host.firstChild, node, 66, 1.05) };
+  dirty = true;
   return true;
 }
 
-export function furReplace(){
+let mounted = false;
+function mountAll(){
+  if (mounted) return true;
   try {
-    const probe = document.createElement("canvas");
-    if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) return false;
-
+    const TILE = SMALL ? 192 : 288;
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !SMALL });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, SMALL ? 1.5 : 2));
-    renderer.autoClear = false;
-    renderer.domElement.id = "furgl";
-    document.body.appendChild(renderer.domElement);
+    renderer.setPixelRatio(1);
+    renderer.setSize(TILE, TILE, false);
+    gl = renderer.domElement;
 
     noiseTex = noiseTexture();
     headGeo  = new THREE.SphereGeometry(1, SMALL ? 20 : 26, SMALL ? 14 : 18);
     camera   = new THREE.PerspectiveCamera(30, 1, .1, 20);
     camera.position.set(0, .12, 5.4);
 
-    /* every card identifier */
     D.all.forEach(rec => {
       const svg = rec.el.querySelector("svg");
-      if (!svg) return;
-      const slot = document.createElement("div");
-      slot.className = "fur-slot";
-      svg.replaceWith(slot);
-      adopt(slot, rec.node, 1);
+      if (svg) mount(svg, rec.node, 48, 1);
     });
-
-    /* and the big one in the header */
     const hero = document.getElementById("bigcat");
     if (hero) {
-      const slot = document.createElement("div");
-      slot.id = "bigcat"; slot.className = "bigcat fur-slot";
-      hero.replaceWith(slot);
-      adopt(slot, D.root, 1.05);
+      const c = mount(hero, D.root, innerWidth < 620 ? 118 : 160, 1.05);
+      c.canvas.id = "bigcat";
+      c.canvas.classList.add("bigcat");
     }
 
     const reduced = matchMedia("(prefers-reduced-motion:reduce)").matches;
-    let last = 0, sw = 0, sh = 0;
+    let lastPx = -1, last = 0;
 
     (function loop(t){
       requestAnimationFrame(loop);
-      if (t - last < 1000 / 30) return;           /* 30fps is plenty for fur */
+      if (!enabled || !mounted || document.body.classList.contains("locked")) return;
+      if (t - last < 1000 / 24) return;
       last = t;
-      if (!enabled || document.body.classList.contains("locked")) return;
 
-      const w = innerWidth, h = innerHeight;
-      if (sw !== w || sh !== h) { renderer.setSize(w, h); sw = w; sh = h; }
-
-      renderer.setScissorTest(false);
-      renderer.clear(true, true, false);          /* wipe last frame's ghosts */
-      renderer.setScissorTest(true);
+      /* Only redraw cats that actually need it. A cat that is sitting still,
+         with the pointer still, costs nothing - which is what makes scrolling
+         free rather than a full repaint of everything on screen. */
+      const pointerMoved = px.moved !== lastPx;
+      lastPx = px.moved;
+      const wasDirty = dirty; dirty = false;
 
       for (const s of scenes) {
-        const r = s.el.getBoundingClientRect();
-        if (!r.width || !r.height || r.bottom < 0 || r.top > h || r.right < 0 || r.left > w) continue;
-        const y = h - r.bottom;
-        renderer.setViewport(r.left, y, r.width, r.height);
-        renderer.setScissor(r.left, y, r.width, r.height);
+        const blinking = t < s.blinkUntil || t > s.blinkAt;
+        const easing = s.ease > 0.0015;
+        if (!wasDirty && !pointerMoved && !blinking && !easing) continue;
+
+        const r = s.canvas.getBoundingClientRect();
+        if (!r.width || r.bottom < -40 || r.top > innerHeight + 40) continue;
 
         if (!reduced) {
-          const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-          const ry = THREE.MathUtils.clamp((px.x - cx) / w * 1.6, -.6, .6);
-          const rx = THREE.MathUtils.clamp((px.y - cy) / h * 1.2, -.42, .5);
-          s.cat.group.rotation.y += (ry - s.cat.group.rotation.y) * .14;
-          s.cat.group.rotation.x += (rx - s.cat.group.rotation.x) * .14;
-          if (t > s.blinkAt) { s.blinkUntil = t + 130; s.blinkAt = t + 2200 + Math.random() * 4500; }
+          /* Aim only when the pointer moves. Recomputing from screen position
+             every frame would mean scrolling constantly moves the target, and
+             nothing ever settles enough to stop redrawing. */
+          if (pointerMoved || s.ty === undefined) {
+            const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+            s.ty = THREE.MathUtils.clamp((px.x - cx) / innerWidth * 1.6, -.6, .6);
+            s.tx = THREE.MathUtils.clamp((px.y - cy) / innerHeight * 1.2, -.42, .5);
+          }
+          const dy = s.ty - s.cat.group.rotation.y, dx = s.tx - s.cat.group.rotation.x;
+          s.cat.group.rotation.y += dy * .18;
+          s.cat.group.rotation.x += dx * .18;
+          s.ease = Math.abs(dy) + Math.abs(dx);
+          if (t > s.blinkAt) { s.blinkUntil = t + 130; s.blinkAt = t + 2600 + Math.random() * 5200; }
           const target = t < s.blinkUntil ? .08 : 1;
-          s.cat.eyes.forEach(e => { e.scale.y += (target - e.scale.y) * .45; });
+          s.cat.eyes.forEach(e => { e.scale.y += (target - e.scale.y) * .5; });
         }
         renderer.render(s.scene, camera);
+        const g2 = s.ctx;
+        g2.clearRect(0, 0, s.canvas.width, s.canvas.height);
+        g2.drawImage(gl, 0, 0, s.canvas.width, s.canvas.height);
       }
-      renderer.setScissorTest(false);
     })(0);
 
-    document.body.classList.add("furry");
-    let want = true;
-    try { want = localStorage.getItem("yoshi.fur") !== "0"; } catch (e) {}
-    if (!want) furSet(false);
+    mounted = true;
     return true;
   } catch (e) {
-    console.warn("fur disabled:", e);
-    if (renderer && renderer.domElement) renderer.domElement.remove();
+    console.warn("fur unavailable:", e);
     return false;
   }
+}
+
+/* Cheap at load: just checks WebGL exists. Nothing is built until switched on. */
+export function furReplace(){
+  const probe = document.createElement("canvas");
+  if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) return false;
+  let want = false;
+  try { want = localStorage.getItem("yoshi.fur") === "1"; } catch (e) {}
+  if (want) furSet(true);
+  return true;
 }
