@@ -16,6 +16,7 @@
  * blue. cols is curated per cat and always right, so it drives this instead.
  */
 const D = window.FUR;
+const DEFAULT_ON = true;   /* the portraits lead the site; the drawn heads are the alternative */
 const DIR = "./assets/cats/";
 const HAVE = new Set(["yoshi","blue","blue-white-01","blue-white-02","blue-white-03",
  "blue-white-harlequin","blue-tabby","blue-tortie","lilac","lilac-white-03","cream",
@@ -77,23 +78,42 @@ function imageFor(node, className){
   return img;
 }
 
-let on = false, currentNode = null;
+let on = DEFAULT_ON, currentNode = null;
+
+function drawn(node, cls){
+  if (!window.face) return null;
+  const holder = document.createElement("span");
+  holder.innerHTML = window.face(node);
+  const el = holder.firstElementChild;
+  if (el && cls) el.classList.add(cls);
+  return el;
+}
 
 function paintHero(){
   const old = document.getElementById("bigcat");
   if (!old) return;
-  let el;
-  if (on) {
-    el = imageFor(D.root, "bigcat generated-cat");
-  } else if (window.face) {
-    const holder = document.createElement("span");
-    holder.innerHTML = window.face(D.root);
-    el = holder.firstElementChild;
-    el.classList.add("bigcat");
-  }
+  const el = on ? imageFor(D.root, "bigcat generated-cat") : drawn(D.root, "bigcat");
   if (!el) return;
   el.id = "bigcat";
   old.replaceWith(el);
+}
+
+/* Every pedigree card carries a portrait frame. Fill all of them in one pass
+   rather than per click, so the wall of faces is what you land on. */
+function paintCards(){
+  (D.all || []).forEach(({ node, el }) => {
+    const slot = el && el.querySelector(".cface");
+    if (!slot) return;
+    const next = on ? imageFor(node, "generated-cat") : drawn(node);
+    if (next) slot.replaceChildren(next);
+  });
+}
+
+function paintGate(){
+  const host = document.getElementById("gatecat");
+  if (!host) return;
+  const el = on ? imageFor(D.root, "generated-cat") : drawn(D.root);
+  if (el) host.replaceChildren(el);
 }
 
 export function furPanel(node){
@@ -112,13 +132,22 @@ export function furSet(value){
   on = !!value;
   try { localStorage.setItem("yoshi.cats", on ? "1" : "0"); } catch (e) {}
   paintHero();
+  paintCards();
+  paintGate();
   if (currentNode) furPanel(currentNode);
 }
 
-/* Called once at load. Apply a stored preference straight away rather than
-   waiting for the first click, which the previous version forgot to do. */
+export function furOn(){ return on; }
+
+/* Called once at load. The portraits are the design now, so they are on unless
+   this browser has explicitly turned them off — an absent key means on, which a
+   plain === "1" test would have got backwards. */
 export function furReplace(){
-  try { on = localStorage.getItem("yoshi.cats") === "1"; } catch (e) { on = false; }
-  if (on) paintHero();
+  let stored = null;
+  try { stored = localStorage.getItem("yoshi.cats"); } catch (e) {}
+  on = stored === null ? DEFAULT_ON : stored === "1";
+  paintHero();
+  paintCards();
+  paintGate();
   return true;
 }
