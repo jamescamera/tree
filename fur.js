@@ -1,5 +1,10 @@
 /* Generated cat portraits.
  *
+ * The artwork arrived as full-body cutouts whose mattes had eaten into the
+ * cats — amputated paws, notched flanks, in a few cases most of the body. The
+ * damage is all below the chest, so the assets are stored cropped to a bust,
+ * which is both intact and a better portrait. See docs/cat-artwork.md.
+ *
  * The 45 small pedigree cards keep their SVG portraits — they stay legible at
  * 48px and they encode the markings, which a photo can't. The hero and the
  * detail card use pre-rendered British Shorthair artwork instead.
@@ -16,12 +21,18 @@ const HAVE = new Set(["yoshi","blue","blue-white-01","blue-white-02","blue-white
  "blue-white-harlequin","blue-tabby","blue-tortie","lilac","lilac-white-03","cream",
  "cream-white-03","chocolate","chocolate-white-03","cinnamon","fawn","black",
  "black-white-03","white","black-smoke","blue-point","lilac-point","chocolate-point",
- "tabby","brown-tabby","tortie","blue-cream-tortie","lilac-cream-tortie",
+ "brown-tabby","tortie","blue-cream-tortie","lilac-cream-tortie",
  "chocolate-tortie","blue-cream-white-03","silver-shaded","golden-shaded",
- "grace-dominica-blh","mum-blue-white-03","dad-blue"]);
+ "mum-blue-white-03","dad-blue"]);
 
 /* No red or cinnamon-tortie artwork exists yet, so those fall to their nearest
-   relative rather than to a default. Noted rather than hidden. */
+   relative rather than to a default. Noted rather than hidden.
+
+   Two more substitutions are forced rather than chosen: the generic tabby and
+   the longhair pictures both arrived with the cat's head cut away by the
+   background matte, and the RGB under the alpha is zeroed, so there is nothing
+   to recover. Tabbies that are neither blue nor chocolate use the brown tabby;
+   longhairs are picked by colour like everyone else and lose their coat length. */
 const NEAREST = { red: "cream", cinnamon: "cinnamon", fawn: "fawn", black: "black",
                   blue: "blue", lilac: "lilac", cream: "cream", chocolate: "chocolate" };
 
@@ -35,7 +46,6 @@ function pick(node){
   const white = meta.white || (cols.includes("white") ? "03" : null);
   const tabby = meta.tabby || (node.tabby ? "25" : null);
 
-  if (meta.longhair) return "grace-dominica-blh";
   if (!solid.length) return "white";
 
   const base = NEAREST[solid[0]] || "blue";
@@ -47,8 +57,7 @@ function pick(node){
     if (base === "blue") return white ? "blue-cream-white-03" : "blue-cream-tortie";
     return "tortie";
   }
-  if (tabby) return base === "blue" ? "blue-tabby"
-            : base === "chocolate" || base === "cinnamon" ? "brown-tabby" : "tabby";
+  if (tabby) return base === "blue" ? "blue-tabby" : "brown-tabby";
   if (white) {
     for (const k of [`${base}-white-${white}`, `${base}-white-03`])
       if (HAVE.has(k)) return k;
