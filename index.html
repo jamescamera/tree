@@ -240,6 +240,35 @@ body.locked .gate{display:flex}
  font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:6px 13px;border-radius:99px;
  margin:0 0 10px;transform:rotate(1.4deg);box-shadow:0 4px 0 -1px rgba(51,32,73,.25)}
 .bday[hidden]{display:none}
+/* watchdog */
+.watch{border:2px solid var(--grape);border-radius:18px;padding:13px 16px;margin:0 0 12px;background:var(--milk)}
+.watch.steady{background:#EFF7EC;border-color:#5E8F52}
+.watch.flagged{background:#FDECE9;border-color:var(--coral)}
+.watch h3{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.05rem;margin:0 0 4px}
+.watch p{margin:5px 0 0;font-size:13px;color:var(--grape-soft);line-height:1.45}
+.watch .bar{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--grape-soft)}
+.watch .bar b{color:var(--grape);font-family:'Archivo',sans-serif;font-size:13px;letter-spacing:0;text-transform:none}
+
+/* map */
+.mapbox{background:var(--milk);border:2px solid var(--grape);border-radius:18px;padding:8px;overflow-x:auto}
+.mapbox svg{display:block;width:100%;min-width:520px;height:auto}
+.mroute{fill:none;stroke:var(--coral);stroke-width:1.6;opacity:.55;stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+#origins.go .mroute{animation:drawline 1.5s ease forwards}
+@keyframes drawline{to{stroke-dashoffset:0}}
+.mdot{fill:var(--marigold);stroke:var(--grape);stroke-width:2}
+.mdot.home{fill:var(--coral)}
+.mlabel{font-family:'IBM Plex Mono',monospace;font-size:7.5px;fill:var(--grape);letter-spacing:.04em}
+.mcount{font-family:'Archivo',sans-serif;font-size:8px;fill:var(--grape-soft)}
+.mgrid{stroke:var(--lilac-deep);stroke-width:.6;opacity:.5}
+
+/* genetics */
+.genes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:11px}
+.gcard{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:12px 14px}
+.gcard h4{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1rem;margin:0 0 5px}
+.gcard .allele{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--coral);letter-spacing:.06em}
+.gcard p{margin:6px 0 0;font-size:12.5px;color:var(--grape-soft);line-height:1.45}
+.gcard .sure{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;border-radius:99px;padding:2px 8px;margin-top:8px;border:1.5px solid var(--lilac-deep);color:var(--grape-soft)}
+.gcard .sure.certain{background:var(--marigold);border-color:var(--marigold);color:var(--grape)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
 .stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
 .stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
@@ -325,6 +354,7 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
   <div class="idcard" id="idcard"></div>
   <div class="due" id="due"></div>
   <div class="chart" id="chart"></div>
+  <div id="watch" hidden></div>
   <div id="litter" hidden></div>
   <p class="log-h">The log</p>
   <ol class="log" id="log"></ol>
@@ -351,6 +381,25 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
   </details>
 </section>
 
+
+<section class="gen" id="origins">
+  <div class="gen-head"><h2>Where he comes from</h2></div>
+  <p class="gen-note">Cattery names carry their country with them — <b>vom</b> and <b>von</b> are German,
+    <b>van Het Hof</b> Dutch, <b>LV*</b> is Latvia's FIFe prefix, a SVERAK registration is Swedish, and the
+    UK side is written in GCCF breed numbers. Plot those and Yoshi turns out to be a thoroughly European cat.</p>
+  <div class="mapbox" id="euromap"></div>
+  <p class="hint" id="originsnote"></p>
+</section>
+
+<section class="gen" id="genes">
+  <div class="gen-head"><h2>Why he's lilac</h2></div>
+  <p class="gen-note">Lilac isn't a colour a cat can inherit directly — it's two other things happening at
+    once. The pedigree is enough to work out exactly what Yoshi must be carrying, and roughly where each
+    piece came from.</p>
+  <div class="genes" id="genepanel"></div>
+  <p class="log-h" style="margin:20px 0 8px">Trace a gene through the family</p>
+  <div class="controls" id="genetrace" style="margin:0"></div>
+</section>
 
 <section class="gen" id="decoder">
   <div class="gen-head"><h2>What the paperwork means</h2></div>
@@ -643,11 +692,11 @@ GENS.forEach((g,gen)=>{
 
 /* nav */
 const nav=document.getElementById("nav");
-nav.innerHTML=`<a href="#map">🌳 The tree</a>`+GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a><a href="#decoder">📖 Decoder</a>`;
+nav.innerHTML=`<a href="#map">🌳 The tree</a>`+GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a><a href="#origins">🌍 Origins</a><a href="#genes">🧬 Genetics</a><a href="#decoder">📖 Decoder</a>`;
 const links=[...nav.querySelectorAll("a")];
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)
   links.forEach(l=>l.classList.toggle("on",l.getAttribute("href")==="#"+e.target.id));});},{rootMargin:"-20% 0px -70%"});
-GENS.forEach(g=>io.observe(document.getElementById(g.id)));["map","health","decoder"].forEach(id=>io.observe(document.getElementById(id)));
+GENS.forEach(g=>io.observe(document.getElementById(g.id)));["map","health","origins","genes","decoder"].forEach(id=>io.observe(document.getElementById(id)));
 
 /* colour trace */
 let filter=null;
@@ -1153,6 +1202,154 @@ document.getElementById("mapsvg").addEventListener("click",e=>{
 document.getElementById("mapsvg").addEventListener("keydown",e=>{
   if(e.key==="Enter"||e.key===" "){const g=e.target.closest(".tn");if(g){e.preventDefault();pick(+g.dataset.i);}}});
 
+/* ---------------- the watchdog ----------------
+   litter_sync.py does the sums and writes them into data/litter.json; this
+   just says what it found. Deliberately not a diagnosis. */
+function renderWatch(w){
+  const box=document.getElementById("watch");
+  if(!w||!w.status||w.status==="no data")return;
+  if(w.status==="learning"){
+    box.className="watch";
+    box.innerHTML=`<h3>Still learning his normal</h3>
+      <p>The watch needs about ${w.days_needed} days of readings before a change means anything.
+         It has <b>${w.days}</b> so far, from ${w.readings} trips to the box. Nothing to say until then —
+         which is the honest answer rather than a green light.</p>`;
+  }else if(w.status==="steady"){
+    box.className="watch steady";
+    box.innerHTML=`<h3>Nothing unusual</h3>
+      <p>This week looks like the month before it. That's the whole point — you only hear from this
+         when it stops being true.</p>
+      <div class="bar"><span>weight this week<br><b>${w.recent_kg} kg</b></span>
+        <span>usual<br><b>${w.base_kg} kg</b></span>
+        <span>trips a day<br><b>${w.recent_visits}</b></span>
+        <span>usual<br><b>${w.base_visits}</b></span></div>`;
+  }else{
+    box.className="watch flagged";
+    box.innerHTML=`<h3>Worth a look</h3>${w.flags.map(f=>`<p>${f.detail}</p>`).join("")}
+      <p><b>This isn't a diagnosis.</b> It only means the numbers have moved further than they usually do.
+         If he's otherwise himself, keep an eye; if anything else seems off, it's a reason to ring the vet.</p>`;
+  }
+  box.hidden=false;
+}
+
+/* ---------------- where the family comes from ----------------
+   Placed by what the names and registries actually tell us. Anything we
+   can't pin down is counted, not guessed at. */
+const PLACES=[
+ {who:"Hackney",cc:"UK",lat:51.55,lon:-0.06,home:true,dy:20,note:"Yoshi"},
+ {who:"The UK lines",cc:"GB",lat:52.6,lon:-1.9,n:9,dy:-10,note:"Windymeadow, Breezing, Wyrewood, Winnosie, Makdissy — GCCF breed numbers"},
+ {who:"vom Kupferstich",cc:"DE",lat:51.1,lon:10.4,n:3,note:"Bonaparte's cattery, bred by Christiane Traut"},
+ {who:"vom kleinen Schlösschen",cc:"DE",lat:49.9,lon:8.7,n:1},
+ {who:"vom Wernerwald",cc:"DE",lat:52.4,lon:9.7,n:2,dy:-12},
+ {who:"vom Elfenfohren / von Flöthbach",cc:"DE",lat:48.4,lon:11.6,n:2},
+ {who:"Kastanjeback",cc:"SE",lat:59.3,lon:18.1,n:1,note:"SVERAK-registered, Sweden"},
+ {who:"Nedercats",cc:"NL",lat:52.1,lon:5.3,n:1,dy:-12},
+ {who:"Het Hof van Logres",cc:"NL",lat:51.4,lon:4.5,n:2,dy:22},
+ {who:"LV*Langewald",cc:"LV",lat:56.9,lon:24.1,n:1,note:"Latvia's FIFe prefix"},
+ {who:"Kotoffski",cc:"RU",lat:55.75,lon:37.6,n:1,note:"the cattery that published Bonaparte's pedigree"},
+ {who:"di Cucciolandia",cc:"IT",lat:41.9,lon:12.5,n:1}
+];
+(function drawMap(){
+  const W=900,H=470,L={x0:-11,x1:41,y0:36,y1:62};
+  const X=lon=>((lon-L.x0)/(L.x1-L.x0))*(W-70)+40;
+  const Y=lat=>H-40-((lat-L.y0)/(L.y1-L.y0))*(H-80);
+  const home=PLACES.find(p=>p.home);
+  const grid=[];
+  for(let lat=40;lat<=60;lat+=5)grid.push(`<line class="mgrid" x1="20" y1="${Y(lat).toFixed(1)}" x2="${W-20}" y2="${Y(lat).toFixed(1)}"/>`);
+  for(let lon=-10;lon<=40;lon+=10)grid.push(`<line class="mgrid" x1="${X(lon).toFixed(1)}" y1="20" x2="${X(lon).toFixed(1)}" y2="${H-20}"/>`);
+  const routes=PLACES.filter(p=>!p.home).map(p=>{
+    const x1=X(p.lon),y1=Y(p.lat),x2=X(home.lon),y2=Y(home.lat);
+    const mx=(x1+x2)/2, my=(y1+y2)/2-Math.hypot(x2-x1,y2-y1)*.18;
+    return `<path class="mroute" d="M${x1.toFixed(1)} ${y1.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}"/>`;
+  }).join("");
+  const dots=PLACES.map(p=>{
+    const x=X(p.lon),y=Y(p.lat);
+    const anchor=p.lon>28?"end":"start", dx=p.lon>28?-9:9;
+    return `<g><circle class="mdot${p.home?" home":""}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${p.home?6:4.5}"/>
+      <text class="mlabel" x="${(x+dx).toFixed(1)}" y="${(y-4+(p.dy||0)).toFixed(1)}" text-anchor="${anchor}">${p.who}</text>
+      ${p.n?`<text class="mcount" x="${(x+dx).toFixed(1)}" y="${(y+6+(p.dy||0)).toFixed(1)}" text-anchor="${anchor}">${p.n} cat${p.n>1?"s":""}</text>`:""}</g>`;
+  }).join("");
+  document.getElementById("euromap").innerHTML=
+    `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Where Yoshi's ancestors were bred, across Europe">
+       ${grid.join("")}${routes}${dots}</svg>`;
+  const placed=PLACES.filter(p=>!p.home).reduce((t,p)=>t+(p.n||0),0);
+  document.getElementById("originsnote").innerHTML=
+    `Plotted by country, not by street — most catteries don't publish an address. ${placed} of the 45 cats
+     can be placed this confidently; the rest carry names that don't give their country away.
+     The grid is real latitude and longitude, so the distances are honest even though the coastline isn't drawn.`;
+  new IntersectionObserver((es,ob)=>{es.forEach(e=>{if(e.isIntersecting){
+    e.target.querySelectorAll(".mroute").forEach(p=>{const l=p.getTotalLength();
+      p.style.setProperty("--len",l);});
+    e.target.classList.add("go");ob.disconnect();}});},{threshold:.15})
+    .observe(document.getElementById("origins"));
+})();
+
+/* ---------------- the genetics ----------------
+   EMS colour letters encode the genes directly, so these are deductions from
+   the paperwork rather than guesses. What must be true is marked as certain;
+   what is merely possible says so. */
+const BLOCUS={n:"black",a:"black",d:"black",e:"black",f:"black",g:"black",
+              b:"chocolate",c:"chocolate",h:"chocolate",j:"chocolate",
+              o:"cinnamon",p:"cinnamon",q:"cinnamon",r:"cinnamon"};
+const DILUTE=new Set(["a","c","e","g","j","p","r"]);
+function geneOf(node){
+  for(const raw of String(node.code).trim().split(/\s+/)){
+    const k=raw.replace(/[()]/g,"").toLowerCase();
+    if(k.length===1&&COLOUR[k])return {letter:k,b:BLOCUS[k],dilute:DILUTE.has(k)};
+  }
+  return null;
+}
+(function genetics(){
+  const carriers=all.map(a=>({node:a.node,g:geneOf(a.node)})).filter(x=>x.g);
+  const dil=carriers.filter(x=>x.g.dilute).length;
+  const choc=carriers.filter(x=>x.g.b==="chocolate").length;
+  const cin=carriers.filter(x=>x.g.b==="cinnamon").length;
+  const cards=[
+   ["Dilute","d / d","certain",
+    `Lilac is a <b>diluted</b> colour — the pigment is laid down in clumps along each hair instead of solidly,
+     which turns black into blue and chocolate into lilac. Dilute is recessive, so Yoshi carries two copies
+     and <b>both his parents had to pass one on</b>. ${dil} cats on his tree are visibly dilute themselves.`],
+   ["Brown series","b / b or b / b<sup>l</sup>","certain",
+    `Under the dilution he is <b>chocolate</b>, not black. Chocolate is recessive to black, so again both
+     parents carried it. ${choc} of his ancestors are chocolate-based on the paperwork; the rest were carrying
+     it invisibly.`],
+   ["Cinnamon","b<sup>l</sup> possible","not settled",
+    `Cinnamon sits below chocolate in the same series, and there are ${cin} cinnamon-based cats on his tree —
+     including two cinnamon torties on his dad's side. The Kastanjeback line is explicitly described as
+     carrying cinnamon. So he <i>may</i> carry it, and colour alone can't tell you. Only a test would.`],
+   ["Red","not carried","certain",
+    `Red and cream ride on the X chromosome. A male cat has one X, so he'd have to <i>be</i> red or cream to
+     carry it — and he's neither. His father was cream, which means <b>any daughter Yoshi had would have been a
+     tortie</b>. He's neutered, so that stays theoretical.`],
+   ["White spotting","S / s","certain",
+    `The <b>03</b> in his code is the white bib and paws. White spotting is dominant, so one copy is enough,
+     and it came from whichever parent was also bi-colour — both were, as it happens.`]
+  ];
+  document.getElementById("genepanel").innerHTML=cards.map(([t,a,sure,p])=>
+    `<div class="gcard"><h4>${t}</h4><div class="allele">${a}</div><p>${p}</p>
+     <span class="sure ${sure==="certain"?"certain":""}">${sure==="certain"?"deduced from the codes":"possible, not proven"}</span></div>`).join("");
+
+  /* reuse the colour-trace filter for genes */
+  const GT=[["Dilute cats",x=>x.dilute],["Chocolate series",x=>x.b==="chocolate"],
+            ["Cinnamon series",x=>x.b==="cinnamon"],["Black series",x=>x.b==="black"]];
+  const box=document.getElementById("genetrace");
+  let active=null;
+  box.innerHTML=GT.map(([l],i)=>`<button class="pill" type="button" data-i="${i}" aria-pressed="false">${l}</button>`).join("");
+  box.addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b)return;
+    const i=+b.dataset.i;
+    active=active===i?null:i;
+    box.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(+x.dataset.i===active)));
+    legend.querySelectorAll(".pill").forEach(x=>x.setAttribute("aria-pressed","false"));
+    all.forEach(({node,el})=>{
+      const g=geneOf(node);
+      const hit=active===null||(g&&GT[active][1](g));
+      el.classList.toggle("dim",!hit);
+      el.classList.toggle("hit",active!==null&&hit);
+    });
+  });
+})();
+
 /* ---------------- the decoder ---------------- */
 const TITLES=[
  ["CHAMPION","The first rung. A cat earns it by collecting certificates from judges at shows. <b>Yasmin British Flowering</b>, Yoshi's great-great-nan, carries it."],
@@ -1273,6 +1470,7 @@ fetch("data/litter.json",{cache:"no-store"})
     if(!d||!d.pets)return;
     const pet=d.pets["Yoshi"]||Object.values(d.pets)[0];
     if(!pet)return;
+    renderWatch(pet.watch);
     const html=renderLitter(pet,d.updated);
     if(!html)return;
     const box=document.getElementById("litter");
