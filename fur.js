@@ -30,11 +30,8 @@ const HAVE = new Set(["yoshi","blue","blue-white-01","blue-white-02","blue-white
    relative rather than to a default. Noted rather than hidden.
 
    Tabbies that are neither blue nor chocolate use the brown tabby, there being
-   no generic tabby artwork. And Grace Dominica is a British Longhair, so coat
-   length wins over colour for her: the longhair artwork is a silver-grey cat
-   and her code says BLH p 03, fawn and white. A shorthair in the right colour
-   read worse than a longhair in the wrong one, since her coat is the whole
-   reason she stands out on this tree. */
+   no generic tabby artwork. Grace Dominica is no longer a substitution: the
+   longhair artwork is now fawn and white, which is what BLH p 03 says she is. */
 const NEAREST = { red: "cream", cinnamon: "cinnamon", fawn: "fawn", black: "black",
                   blue: "blue", lilac: "lilac", cream: "cream", chocolate: "chocolate" };
 
