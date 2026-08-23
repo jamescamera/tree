@@ -250,16 +250,32 @@ body.locked .gate{display:flex}
 .watch .bar b{color:var(--grape);font-family:'Archivo',sans-serif;font-size:13px;letter-spacing:0;text-transform:none}
 
 /* map */
-.mapbox{background:var(--milk);border:2px solid var(--grape);border-radius:18px;padding:8px;overflow-x:auto}
-.mapbox svg{display:block;width:100%;min-width:520px;height:auto}
-.mroute{fill:none;stroke:var(--coral);stroke-width:1.6;opacity:.55;stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
-#origins.go .mroute{animation:drawline 1.5s ease forwards}
+.mapbox{background:var(--milk);border:2px solid var(--grape);border-radius:18px;padding:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* below this the badges stop being readable, so let it scroll rather than shrink */
+.mapbox svg{display:block;width:100%;min-width:620px;height:auto}
+.mroute{fill:none;stroke:var(--coral);stroke-width:2.4;opacity:.4;stroke-linecap:round;
+ stroke-dasharray:var(--len);stroke-dashoffset:var(--len);transition:opacity .2s,stroke-width .2s}
+#origins.go .mroute{animation:drawline 1.6s ease forwards}
 @keyframes drawline{to{stroke-dashoffset:0}}
-.mdot{fill:var(--marigold);stroke:var(--grape);stroke-width:2}
-.mdot.home{fill:var(--coral)}
-.mlabel{font-family:'IBM Plex Mono',monospace;font-size:7.5px;fill:var(--grape);letter-spacing:.04em}
-.mcount{font-family:'Archivo',sans-serif;font-size:8px;fill:var(--grape-soft)}
-.mgrid{stroke:var(--lilac-deep);stroke-width:.6;opacity:.5}
+.mroute.lit{opacity:1;stroke-width:4}
+.mgrid{stroke:var(--lilac-deep);stroke-width:1;opacity:.55}
+.mtick{font-family:'IBM Plex Mono',monospace;font-size:9px;fill:var(--lilac-deep)}
+.mbadge{cursor:pointer}
+.mbadge circle{fill:var(--milk);stroke:var(--grape);stroke-width:2.5;transition:stroke .2s}
+.mbadge.lit circle{stroke:var(--coral);stroke-width:4}
+.mname{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:13px;fill:var(--grape)}
+.mcount{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:var(--grape-soft);letter-spacing:.06em}
+.mhome circle{fill:var(--marigold);stroke:var(--grape);stroke-width:3}
+.olist{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:9px;margin:12px 0 0}
+.orow{display:flex;gap:11px;align-items:flex-start;background:var(--milk);border:2px solid var(--grape);
+ border-radius:14px;padding:10px 12px;cursor:pointer;transition:border-color .2s,transform .15s}
+.orow.lit{border-color:var(--coral);transform:translateY(-2px)}
+.oflag{font-size:26px;line-height:1;flex:none}
+.orow b{font-family:'Fraunces',Georgia,serif;font-size:15px}
+.orow i{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;
+ text-transform:uppercase;color:var(--grape-soft);margin-left:6px}
+.owho{display:block;font-size:11.5px;color:var(--grape);margin-top:3px;line-height:1.4}
+.ohow{display:block;font-size:11px;color:var(--grape-soft);margin-top:3px;font-style:italic}
 
 /* genetics */
 .genes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:11px}
@@ -388,6 +404,7 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
     <b>van Het Hof</b> Dutch, <b>LV*</b> is Latvia's FIFe prefix, a SVERAK registration is Swedish, and the
     UK side is written in GCCF breed numbers. Plot those and Yoshi turns out to be a thoroughly European cat.</p>
   <div class="mapbox" id="euromap"></div>
+  <div class="olist" id="originslist"></div>
   <p class="hint" id="originsnote"></p>
 </section>
 
@@ -1235,52 +1252,93 @@ function renderWatch(w){
 /* ---------------- where the family comes from ----------------
    Placed by what the names and registries actually tell us. Anything we
    can't pin down is counted, not guessed at. */
-const PLACES=[
- {who:"Hackney",cc:"UK",lat:51.55,lon:-0.06,home:true,dy:20,note:"Yoshi"},
- {who:"The UK lines",cc:"GB",lat:52.6,lon:-1.9,n:9,dy:-10,note:"Windymeadow, Breezing, Wyrewood, Winnosie, Makdissy — GCCF breed numbers"},
- {who:"vom Kupferstich",cc:"DE",lat:51.1,lon:10.4,n:3,note:"Bonaparte's cattery, bred by Christiane Traut"},
- {who:"vom kleinen Schlösschen",cc:"DE",lat:49.9,lon:8.7,n:1},
- {who:"vom Wernerwald",cc:"DE",lat:52.4,lon:9.7,n:2,dy:-12},
- {who:"vom Elfenfohren / von Flöthbach",cc:"DE",lat:48.4,lon:11.6,n:2},
- {who:"Kastanjeback",cc:"SE",lat:59.3,lon:18.1,n:1,note:"SVERAK-registered, Sweden"},
- {who:"Nedercats",cc:"NL",lat:52.1,lon:5.3,n:1,dy:-12},
- {who:"Het Hof van Logres",cc:"NL",lat:51.4,lon:4.5,n:2,dy:22},
- {who:"LV*Langewald",cc:"LV",lat:56.9,lon:24.1,n:1,note:"Latvia's FIFe prefix"},
- {who:"Kotoffski",cc:"RU",lat:55.75,lon:37.6,n:1,note:"the cattery that published Bonaparte's pedigree"},
- {who:"di Cucciolandia",cc:"IT",lat:41.9,lon:12.5,n:1}
+const HOME={lat:51.55,lon:-0.06};
+const COUNTRIES=[
+ {cc:"GB",flag:"🇬🇧",name:"Britain",lat:54.6,lon:-4.0,cats:9,above:true,
+  who:"Windymeadow · Breezing · Wyrewood · Winnosie · Makdissy",
+  how:"GCCF breed numbers instead of letter codes"},
+ {cc:"DE",flag:"🇩🇪",name:"Germany",lat:51.0,lon:10.0,cats:8,
+  who:"vom Kupferstich · vom kleinen Schlösschen · vom Wernerwald · vom Elfenfohren · von Flöthbach",
+  how:"vom and von are German possessives"},
+ {cc:"NL",flag:"🇳🇱",name:"Netherlands",lat:52.2,lon:5.3,cats:3,
+  who:"Nedercats · Het Hof van Logres",
+  how:"van Het Hof is Dutch"},
+ {cc:"SE",flag:"🇸🇪",name:"Sweden",lat:59.3,lon:18.1,cats:1,
+  who:"Kastanjeback",how:"registered with SVERAK, the Swedish federation"},
+ {cc:"LV",flag:"🇱🇻",name:"Latvia",lat:56.9,lon:24.1,cats:1,
+  who:"LV*Langewald",how:"LV* is Latvia's FIFe cattery prefix"},
+ {cc:"RU",flag:"🇷🇺",name:"Russia",lat:55.75,lon:37.6,cats:1,
+  who:"Kotoffski",how:"the cattery that published Bonaparte's pedigree"},
+ {cc:"IT",flag:"🇮🇹",name:"Italy",lat:42.5,lon:12.5,cats:1,
+  who:"di Cucciolandia",how:"di is Italian"}
 ];
 (function drawMap(){
-  const W=900,H=470,L={x0:-11,x1:41,y0:36,y1:62};
-  const X=lon=>((lon-L.x0)/(L.x1-L.x0))*(W-70)+40;
-  const Y=lat=>H-40-((lat-L.y0)/(L.y1-L.y0))*(H-80);
-  const home=PLACES.find(p=>p.home);
+  const W=920,H=560,L={x0:-13,x1:43,y0:39,y1:63};
+  const X=lon=>((lon-L.x0)/(L.x1-L.x0))*(W-90)+50;
+  const Y=lat=>H-56-((lat-L.y0)/(L.y1-L.y0))*(H-116);
+  const hx=X(HOME.lon),hy=Y(HOME.lat);
   const grid=[];
-  for(let lat=40;lat<=60;lat+=5)grid.push(`<line class="mgrid" x1="20" y1="${Y(lat).toFixed(1)}" x2="${W-20}" y2="${Y(lat).toFixed(1)}"/>`);
-  for(let lon=-10;lon<=40;lon+=10)grid.push(`<line class="mgrid" x1="${X(lon).toFixed(1)}" y1="20" x2="${X(lon).toFixed(1)}" y2="${H-20}"/>`);
-  const routes=PLACES.filter(p=>!p.home).map(p=>{
-    const x1=X(p.lon),y1=Y(p.lat),x2=X(home.lon),y2=Y(home.lat);
-    const mx=(x1+x2)/2, my=(y1+y2)/2-Math.hypot(x2-x1,y2-y1)*.18;
-    return `<path class="mroute" d="M${x1.toFixed(1)} ${y1.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}"/>`;
+  for(let lat=40;lat<=60;lat+=10)grid.push(
+    `<line class="mgrid" x1="26" y1="${Y(lat).toFixed(1)}" x2="${W-26}" y2="${Y(lat).toFixed(1)}"/>
+     <text class="mtick" x="30" y="${(Y(lat)-5).toFixed(1)}">${lat}°N</text>`);
+  for(let lon=-10;lon<=40;lon+=10)grid.push(`<line class="mgrid" x1="${X(lon).toFixed(1)}" y1="26" x2="${X(lon).toFixed(1)}" y2="${H-26}"/>`);
+
+  const routes=COUNTRIES.map(c=>{
+    const x=X(c.lon),y=Y(c.lat);
+    const mx=(x+hx)/2, my=(y+hy)/2-Math.hypot(hx-x,hy-y)*.22;
+    return `<path class="mroute" data-cc="${c.cc}" d="M${x.toFixed(1)} ${y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${hx.toFixed(1)} ${hy.toFixed(1)}"/>`;
   }).join("");
-  const dots=PLACES.map(p=>{
-    const x=X(p.lon),y=Y(p.lat);
-    const anchor=p.lon>28?"end":"start", dx=p.lon>28?-9:9;
-    return `<g><circle class="mdot${p.home?" home":""}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${p.home?6:4.5}"/>
-      <text class="mlabel" x="${(x+dx).toFixed(1)}" y="${(y-4+(p.dy||0)).toFixed(1)}" text-anchor="${anchor}">${p.who}</text>
-      ${p.n?`<text class="mcount" x="${(x+dx).toFixed(1)}" y="${(y+6+(p.dy||0)).toFixed(1)}" text-anchor="${anchor}">${p.n} cat${p.n>1?"s":""}</text>`:""}</g>`;
+
+  const badges=COUNTRIES.map(c=>{
+    const x=X(c.lon),y=Y(c.lat),r=15+c.cats*1.7;
+    return `<g class="mbadge" data-cc="${c.cc}" tabindex="0" role="button">
+      <title>${c.name} — ${c.cats} cat${c.cats>1?"s":""}</title>
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/>
+      <text class="mflag" x="${x.toFixed(1)}" y="${(y+r*.28).toFixed(1)}" font-size="${(r*1.15).toFixed(1)}" text-anchor="middle">${c.flag}</text>
+      <text class="mname" x="${x.toFixed(1)}" y="${(c.above?y-r-16:y+r+15).toFixed(1)}" text-anchor="middle">${c.name}</text>
+      <text class="mcount" x="${x.toFixed(1)}" y="${(c.above?y-r-5:y+r+27).toFixed(1)}" text-anchor="middle">${c.cats} cat${c.cats>1?"s":""}</text></g>`;
   }).join("");
+
+  const home=`<g class="mhome"><circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="13"/>
+    <text x="${hx.toFixed(1)}" y="${(hy+5).toFixed(1)}" font-size="15" text-anchor="middle">🏠</text>
+    <text class="mname" x="${hx.toFixed(1)}" y="${(hy+30).toFixed(1)}" text-anchor="middle">Hackney</text></g>`;
+
   document.getElementById("euromap").innerHTML=
-    `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Where Yoshi's ancestors were bred, across Europe">
-       ${grid.join("")}${routes}${dots}</svg>`;
-  const placed=PLACES.filter(p=>!p.home).reduce((t,p)=>t+(p.n||0),0);
+    `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Where Yoshi's ancestors were bred: Britain, Germany, the Netherlands, Sweden, Latvia, Russia and Italy, all leading to Hackney">
+       <rect x="0" y="0" width="${W}" height="${H}" fill="#F4F0FB" rx="12"/>
+       ${grid.join("")}${routes}${badges}${home}</svg>`;
+
+  /* the legend is what actually works on a phone */
+  document.getElementById("originslist").innerHTML=COUNTRIES.map(c=>
+    `<div class="orow" data-cc="${c.cc}"><span class="oflag">${c.flag}</span>
+       <div><b>${c.name}</b> <i>${c.cats} cat${c.cats>1?"s":""}</i>
+       <span class="owho">${c.who}</span>
+       <span class="ohow">${c.how}</span></div></div>`).join("");
+
+  /* hovering either the badge or its row lights the route */
+  const lightUp=cc=>{
+    document.querySelectorAll(".mroute").forEach(p=>p.classList.toggle("lit",cc&&p.dataset.cc===cc));
+    document.querySelectorAll(".mbadge").forEach(g=>g.classList.toggle("lit",cc&&g.dataset.cc===cc));
+    document.querySelectorAll(".orow").forEach(r=>r.classList.toggle("lit",cc&&r.dataset.cc===cc));
+  };
+  ["#euromap .mbadge","#originslist .orow"].forEach(sel=>
+    document.querySelectorAll(sel).forEach(el=>{
+      el.addEventListener("pointerenter",()=>lightUp(el.dataset.cc));
+      el.addEventListener("focus",()=>lightUp(el.dataset.cc));
+      el.addEventListener("pointerleave",()=>lightUp(null));
+      el.addEventListener("blur",()=>lightUp(null));
+      el.addEventListener("click",()=>lightUp(el.classList.contains("lit")?null:el.dataset.cc));
+    }));
+
+  const placed=COUNTRIES.reduce((t,c)=>t+c.cats,0);
   document.getElementById("originsnote").innerHTML=
-    `Plotted by country, not by street — most catteries don't publish an address. ${placed} of the 45 cats
-     can be placed this confidently; the rest carry names that don't give their country away.
-     The grid is real latitude and longitude, so the distances are honest even though the coastline isn't drawn.`;
+    `${placed} of the 45 cats can be placed this confidently — the rest carry names that don't give their
+     country away. Plotted by country rather than by street, since catteries don't publish addresses, but
+     the grid is real latitude and longitude so the distances are honest.`;
+
   new IntersectionObserver((es,ob)=>{es.forEach(e=>{if(e.isIntersecting){
-    e.target.querySelectorAll(".mroute").forEach(p=>{const l=p.getTotalLength();
-      p.style.setProperty("--len",l);});
-    e.target.classList.add("go");ob.disconnect();}});},{threshold:.15})
+    e.target.querySelectorAll(".mroute").forEach(p=>p.style.setProperty("--len",p.getTotalLength()));
+    e.target.classList.add("go");ob.disconnect();}});},{threshold:.12})
     .observe(document.getElementById("origins"));
 })();
 
