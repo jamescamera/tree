@@ -55,17 +55,24 @@ Both slots that use these — `.portrait` and `.bigcat` — are square, so the C
   shows as a solid cinnamon despite being `BSH q 03`.
 - **Tabbies that are neither blue nor chocolate → brown tabby**, no generic
   tabby artwork.
-- **Grace Dominica** is `BLH p 03` — fawn and white — but the longhair artwork is
-  a silver-grey cat. Coat length wins over colour for her, because the coat is the
-  whole reason she stands out on this tree. Her crop keeps more chest than the
-  others so the ruff actually reads; at the standard 60% she looks shorthaired.
+**Grace Dominica is no longer a substitution.** Her artwork is fawn and white,
+matching `BLH p 03`. Her crop keeps more chest than the others (80% rather than
+60%) so the ruff actually reads — at the standard crop a longhair looks
+shorthaired.
 
-## Still on the old batch
+## Two more repairs the pipeline does
 
-Three assets carry 13 of the 45 cats and are still from the original grey-backdrop
-batch: `lilac` (5 cats), `cream-white-03` (5) and `cream` (3). They are undamaged,
-but the face shape differs slightly from the cyan set. A follow-up render of those
-three on cyan would make the set uniform.
+Later batches needed two steps beyond the key and despill, both kept because they
+cost nothing when there is nothing to fix:
+
+- **Colour un-contamination.** Where a source has already blended cat into
+  backdrop, its partial-alpha pixels are part cyan, and despilling those just
+  turns them dark — a dirty outline. Take their colour from the nearest fully
+  opaque pixel and let alpha alone carry the soft edge.
+- **Stroked outlines.** One source arrived with a thin near-black line drawn
+  round the cat, opaque, so no key touches it. Dark neutral pixels sitting
+  against the backdrop are cut. Safe here because no cat in the set is black at
+  the silhouette — revisit this if one ever is.
 
 Earlier states are in git history: the original full-body cutouts at `4febd11`,
 the first bust crop at `16adfc0`.
