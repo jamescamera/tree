@@ -19,8 +19,8 @@ const FUR = 0.022;
 const INK = 0x332049;
 const MODEL_URL = "./assets/british_shorthair_base.glb";
 
-let renderer=null, noiseTex=null, coatGeo=null, camera=null, gl=null;
-let modelPromise=null, mounted=false, enabled=true, dirty=true;
+let renderer=null, noiseTex=null, coatParts=null, camera=null, gl=null;
+let modelPromise=null, mounted=false, enabled=true, dirty=true, modelMid=0.5;
 const scenes=[];
 let panelSlot=null;
 
@@ -92,7 +92,10 @@ function coatTexture(node){
   const tx=new THREE.CanvasTexture(cv);
   tx.colorSpace=THREE.SRGBColorSpace;
   tx.wrapS=tx.wrapT=THREE.RepeatWrapping;
-  tx.flipY=true;
+  /* This mesh unwraps with v=0 at the crown and v=1 at the paws, so the canvas
+     must NOT be flipped - otherwise the white climbs down from the head instead
+     of up from the chest, and every bi-colour cat gets a white face. */
+  tx.flipY=false;
   return tx;
 }
 
@@ -145,7 +148,7 @@ async function loadBshGeometry(url){
     off=start+len;
   }
   if(!json||!bin)throw new Error("Incomplete GLB");
-  const mesh=json.meshes[0].primitives[0],geo=new THREE.BufferGeometry();
+  const parts=[];
   const read=accessorIndex=>{
     const a=json.accessors[accessorIndex],bv=json.bufferViews[a.bufferView];
     const comps={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[a.type];
@@ -157,14 +160,29 @@ async function loadBshGeometry(url){
     }
     return {a,out};
   };
-  const pos=read(mesh.attributes.POSITION),uv=read(mesh.attributes.TEXCOORD_0),norm=read(mesh.attributes.NORMAL),idx=read(mesh.indices);
-  geo.setAttribute("position",new THREE.BufferAttribute(pos.out,3));
-  geo.setAttribute("uv",new THREE.BufferAttribute(uv.out,2));
-  geo.setAttribute("normal",new THREE.BufferAttribute(norm.out,3));
-  const IndexArray=idx.a.componentType===5125?Uint32Array:Uint16Array;
-  geo.setIndex(new THREE.BufferAttribute(new IndexArray(idx.out.map(v=>v)),1));
-  geo.computeBoundingSphere();
-  return geo;
+  /* The model ships its own ears, muzzle, chin, eyes and pupils as separate
+     meshes with their own materials. Reading only meshes[0] threw all of that
+     away and left a headless body, so take every primitive and remember which
+     material it belongs to. */
+  for(const m of json.meshes){
+    for(const prim of m.primitives){
+      const geo=new THREE.BufferGeometry();
+      const pos=read(prim.attributes.POSITION),idx=read(prim.indices);
+      geo.setAttribute("position",new THREE.BufferAttribute(pos.out,3));
+      if(prim.attributes.TEXCOORD_0!==undefined)
+        geo.setAttribute("uv",new THREE.BufferAttribute(read(prim.attributes.TEXCOORD_0).out,2));
+      /* No NORMAL in this export. Reading it unconditionally threw, and the
+         caller swallowed that - so the toggle looked dead rather than broken. */
+      if(prim.attributes.NORMAL!==undefined)
+        geo.setAttribute("normal",new THREE.BufferAttribute(read(prim.attributes.NORMAL).out,3));
+      const IndexArray=idx.a.componentType===5125?Uint32Array:Uint16Array;
+      geo.setIndex(new THREE.BufferAttribute(new IndexArray(idx.out.map(v=>v)),1));
+      if(!geo.getAttribute("normal"))geo.computeVertexNormals();
+      geo.computeBoundingSphere();
+      parts.push({geo,role:(json.materials[prim.material]||{}).name||"Coat_Neutral"});
+    }
+  }
+  return parts;
 }
 
 function buildCat(node){
@@ -172,37 +190,31 @@ function buildCat(node){
   const base=new THREE.Color(D.C[solid[0]]||"#B7A6BC");
   const map=coatTexture(node),g=new THREE.Group();
   const len=meta.longhair?0.040:FUR;
-  for(let i=0;i<=SHELLS;i++)g.add(new THREE.Mesh(coatGeo,furMaterial(map,i/SHELLS,len)));
-
-  /* Characterful BSH face pieces: low-set rounded ears, broad jowl pads and
-     a short triangular nose. They are deliberately separate from the coat
-     shell so the face stays crisp while the body gets procedural fur. */
-  const earGeo=new THREE.SphereGeometry(1,12,8);
-  [[-.235,.862,.02,.13,.16,.075],[.235,.862,.02,.13,.16,.075]].forEach(([x,y,z,sx,sy,sz])=>{
-    const e=new THREE.Mesh(earGeo,lam(base));e.scale.set(sx,sy,sz);e.position.set(x,y,z);g.add(e);
-    const inner=new THREE.Mesh(new THREE.SphereGeometry(1,10,7),lam(0xE9A7B4));
-    inner.scale.set(sx*.52,sy*.55,sz*.55);inner.position.set(x,y-.005,z+.055);g.add(inner);
-  });
-  const padL=new THREE.Mesh(new THREE.SphereGeometry(1,14,10),lam(0xFFFDF7));
-  padL.scale.set(.13,.085,.075);padL.position.set(-.105,.676,.296);g.add(padL);
-  const padR=padL.clone();padR.position.x=.105;g.add(padR);
-  const chin=new THREE.Mesh(new THREE.SphereGeometry(1,14,10),lam(0xFFFDF7));
-  chin.scale.set(.15,.065,.07);chin.position.set(0,.635,.28);g.add(chin);
-  const nose=new THREE.Mesh(new THREE.ConeGeometry(.028,.038,3),lam(0xC96E7E));
-  nose.rotation.x=Math.PI;nose.position.set(0,.709,.335);g.add(nose);
-
   const eyeCode=meta.eyes;
-  const eyeCols=eyeCode==="63"?[0x7FB2E5,0xE9A72B]:eyeCode&&D.EYECOL[eyeCode]?[D.EYECOL[eyeCode],D.EYECOL[eyeCode]]:[0xE9A72B,0xE9A72B];
-  const eyes=[];
-  [-.112,.112].forEach((x,i)=>{
-    const e=new THREE.Mesh(new THREE.SphereGeometry(.048,14,10),lam(eyeCols[i]));
-    e.position.set(x,.786,.276);g.add(e);eyes.push(e);
-    const p=new THREE.Mesh(new THREE.SphereGeometry(.020,10,8),lam(INK));
-    p.scale.set(.7,1.35,.5);p.position.set(x,.786,.318);g.add(p);
-  });
+  const eyeCols=eyeCode==="63"?[0x7FB2E5,0xE9A72B]
+    :eyeCode&&D.EYECOL[eyeCode]?[D.EYECOL[eyeCode],D.EYECOL[eyeCode]]
+    :[0xE9A72B,0xE9A72B];
+  const eyes=[];let eyeSeen=0;
+
+  for(const part of coatParts){
+    if(part.role==="Coat_Neutral"){
+      /* the body wears the painted coat, layered into fur shells */
+      for(let i=0;i<=SHELLS;i++)g.add(new THREE.Mesh(part.geo,furMaterial(map,i/SHELLS,len)));
+    }else if(part.role==="Face_Neutral"){
+      /* ears, muzzle and chin stay crisp so the face doesn't dissolve */
+      g.add(new THREE.Mesh(part.geo,lam(base)));
+    }else if(part.role==="Eye_Iris"){
+      const e=new THREE.Mesh(part.geo,lam(eyeCols[eyeSeen++%2]));
+      g.add(e);eyes.push(e);
+    }else{
+      g.add(new THREE.Mesh(part.geo,lam(INK)));
+    }
+  }
   return {group:g,eyes};
 }
 
+/* Where the pointer is, so the cats can look towards it. Restored here after
+   the face rewrite - it used to live between buildCat and makeScene. */
 const px={x:innerWidth/2,y:innerHeight/2,moved:0};
 addEventListener("pointermove",e=>{px.x=e.clientX;px.y=e.clientY;px.moved++;},{passive:true});
 
@@ -210,7 +222,10 @@ function makeScene(node,scale){
   const scene=new THREE.Scene();
   scene.add(new THREE.HemisphereLight(0xffffff,0xC9BCEA,2.1));
   const d=new THREE.DirectionalLight(0xffffff,2.0);d.position.set(1,2,3);scene.add(d);
-  const cat=buildCat(node);cat.group.scale.setScalar(scale||1);scene.add(cat.group);
+  const cat=buildCat(node);const k=scale||1;
+  cat.group.scale.setScalar(k);
+  cat.group.position.y=-modelMid*k;   /* pivot about the middle, not the paws */
+  scene.add(cat.group);
   return {scene,cat};
 }
 
@@ -242,8 +257,8 @@ function startLoop(){
       if(!reduced){
         if(pointerMoved||s.ty===undefined){
           const cx=r.left+r.width/2,cy=r.top+r.height/2;
-          s.ty=THREE.MathUtils.clamp((px.x-cx)/innerWidth*1.6,-.6,.6);
-          s.tx=THREE.MathUtils.clamp((px.y-cy)/innerHeight*1.2,-.42,.5);
+          s.ty=THREE.MathUtils.clamp((px.x-cx)/innerWidth*1.3,-.5,.5);
+          s.tx=THREE.MathUtils.clamp((px.y-cy)/innerHeight*0.55,-.20,.24);
         }
         const dy=s.ty-s.cat.group.rotation.y,dx=s.tx-s.cat.group.rotation.x;
         s.cat.group.rotation.y+=dy*.18;s.cat.group.rotation.x+=dx*.18;s.ease=Math.abs(dy)+Math.abs(dx);
@@ -259,11 +274,18 @@ function startLoop(){
 async function mountAll(){
   if(mounted)return true;
   try{
-    coatGeo=await(modelPromise||(modelPromise=loadBshGeometry(MODEL_URL)));
+    coatParts=await(modelPromise||(modelPromise=loadBshGeometry(MODEL_URL)));
     renderer=new THREE.WebGLRenderer({alpha:true,antialias:!SMALL});
     renderer.setPixelRatio(1);renderer.setSize(SMALL?192:288,SMALL?192:288,false);gl=renderer.domElement;
     noiseTex=noiseTexture();
-    camera=new THREE.PerspectiveCamera(30,1,.05,10);camera.position.set(0,.50,2.45);camera.lookAt(0,.50,0.02);
+    /* The model stands with its origin at the paws. Rotating about that swung
+       the head clean out of frame, so measure it and pivot about the middle. */
+    const bb=new THREE.Box3();
+    for(const part of coatParts){part.geo.computeBoundingBox();bb.union(part.geo.boundingBox);}
+    modelMid=(bb.min.y+bb.max.y)/2;
+    const span=Math.max(bb.max.y-bb.min.y,bb.max.x-bb.min.x)*1.32;
+    camera=new THREE.PerspectiveCamera(30,1,.05,10);
+    camera.position.set(0,0,span/(2*Math.tan(15*Math.PI/180)));camera.lookAt(0,0,0);
     D.all.forEach(rec=>{const svg=rec.el.querySelector("svg");if(svg)mount(svg,rec.node,48,1);});
     const hero=document.getElementById("bigcat");
     if(hero){const c=mount(hero,D.root,innerWidth<620?118:160,1);c.canvas.id="bigcat";c.canvas.classList.add("bigcat");}
