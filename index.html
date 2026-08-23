@@ -159,6 +159,7 @@ body.locked .gate{display:flex}
 /* drawn tree */
 .mapwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:rgba(255,252,244,.5);border:2px dotted var(--lilac-deep);border-radius:18px;padding:10px}
 #mapsvg>svg{display:block;min-width:1700px;width:100%;height:auto}
+#mapsvg.fit>svg{min-width:0}     /* whole tree on screen; tap a cat for the detail */
 .lk{fill:none;stroke:var(--lilac-deep);stroke-width:2.5}
 .tn{cursor:pointer}
 .tn rect{fill:var(--milk);stroke:var(--grape);stroke-width:2}
@@ -235,6 +236,10 @@ body.locked .gate{display:flex}
 #cattitle:empty{display:none}
 #catdesc{margin:0;font-size:13px;color:var(--grape-soft);line-height:1.45}
 @media (max-width:620px){#cat{right:8px;left:8px;bottom:8px;width:auto}.pcard{max-height:70vh}}
+.bday{display:inline-block;background:var(--coral);color:#fff;font-family:'IBM Plex Mono',monospace;
+ font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:6px 13px;border-radius:99px;
+ margin:0 0 10px;transform:rotate(1.4deg);box-shadow:0 4px 0 -1px rgba(51,32,73,.25)}
+.bday[hidden]{display:none}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:0 0 12px}
 .stat{background:var(--milk);border:2px solid var(--grape);border-radius:16px;padding:10px 13px}
 .stat b{display:block;font-family:'Fraunces',Georgia,serif;font-size:1.5rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
@@ -272,6 +277,7 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 <header>
   <svg id="bigcat" viewBox="0 0 100 100" role="img" aria-label="Yoshi, a lilac and white British Shorthair"></svg>
   <div class="hero-txt">
+    <p class="bday" id="bday" hidden></p>
     <p class="eyebrow">🐾 45 cats · 8 generations · scroll back in time</p>
     <h1>Yoshi Cormac <span>Babaganoush</span></h1>
     <p class="sub">Every cat on his pedigree certificate, drawn in the coat colour the paperwork says they were — and, on one branch, three more generations dug up since. Tap anyone to meet them.</p>
@@ -302,6 +308,7 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
 
 <section class="gen" id="map">
   <div class="gen-head"><h2>The whole tree, drawn out</h2>
+    <button class="pill" id="fitmap">⤢ Fit to screen</button>
     <button class="pill" id="replay">↻ Draw it again</button></div>
   <p class="gen-note">Yoshi on the left, reaching back to the right. Five generations come off his
     certificate; the long branch running to the far right is Bonaparte's line, carried three
@@ -499,6 +506,15 @@ function codeMeta(code){
   }
   return o;
 }
+/* British Shorthairs are round: broad skull, full jowls, small ears set low and
+   wide, big round eyes, short nose. The old head was a plain ellipse with tall
+   pointed ears, which read as "generic cat". These are the breed's proportions. */
+const HEAD="M50 19C72 19 87.5 32 88 52C88.5 67 83 80.5 71 86.5C64 90.5 56.5 92 50 92"+
+           "C43.5 92 36 90.5 29 86.5C17 80.5 11.5 67 12 52C12.5 32 28 19 50 19Z";
+const EAR_L="M13.5 47C10 26.5 16.5 12 30 16.5C33.5 26 31 38 25 47Z";
+const EAR_R="M86.5 47C90 26.5 83.5 12 70 16.5C66.5 26 69 38 75 47Z";
+const INR_L="M18.5 43C16.5 30 20 22 27.5 24.5C29.5 31 27.5 37.5 24 43Z";
+const INR_R="M81.5 43C83.5 30 80 22 72.5 24.5C70.5 31 72.5 37.5 76 43Z";
 function face(node){
   const id="c"+(uid++), rnd=rng(hashName(node.name)), meta=codeMeta(node.code);
   const solid=node.cols.filter(c=>c!=="white");
@@ -508,48 +524,43 @@ function face(node){
   const tabby=meta.tabby||(node.tabby?"25":null);
   const eyeL=meta.eyes==="63"?"#7FB2E5":(meta.eyes?EYECOL[meta.eyes]:EYE);
   const eyeR=meta.eyes==="63"?"#E9A72B":(meta.eyes?EYECOL[meta.eyes]:EYE);
-  const rx=(35+rnd()*3).toFixed(1), ry=(31+rnd()*3).toFixed(1);
-  const tilt=(rnd()*5-2.5).toFixed(1), wsk=(12+rnd()*4).toFixed(1);
+  const tilt=(rnd()*4-2).toFixed(1), wsk=(11+rnd()*4).toFixed(1);
   const ink="#332049";
 
-  /* tortoiseshell: soft mottling rather than one hard split */
   const tortie=second?Array.from({length:8},()=>{
-    const a=rnd()*6.28, d=rnd()*.8;
-    const cx=(50+Math.cos(a)*rx*d).toFixed(1), cy=(57+Math.sin(a)*ry*d).toFixed(1);
+    const a=rnd()*6.28, d=rnd()*.78;
+    const cx=(50+Math.cos(a)*34*d).toFixed(1), cy=(56+Math.sin(a)*33*d).toFixed(1);
     return `<ellipse cx="${cx}" cy="${cy}" rx="${(7+rnd()*9).toFixed(1)}" ry="${(6+rnd()*7).toFixed(1)}" fill="${second}" transform="rotate(${(rnd()*180).toFixed(0)} ${cx} ${cy})" opacity=".92"/>`;
   }).join(""):"";
 
-  /* tabby markings, by type */
   let marks="";
   if(tabby){
-    const st=`stroke="${ink}" stroke-opacity=".33" fill="none" stroke-linecap="round"`;
-    const M=`<path d="M40 31 l6 9 M50 28 v10 M60 31 l-6 9" ${st} stroke-width="3"/>`;
+    const st=`stroke="${ink}" stroke-opacity=".32" fill="none" stroke-linecap="round"`;
+    const M=`<path d="M40 32 l6 9 M50 29 v10 M60 32 l-6 9" ${st} stroke-width="3"/>`;
     if(tabby==="25") marks=M+`<g ${st} stroke-width="2">`+Array.from({length:12},()=>{
-        const a=rnd()*6.28,d=.35+rnd()*.5, x=(50+Math.cos(a)*rx*d).toFixed(1), y=(57+Math.sin(a)*ry*d).toFixed(1);
-        return `<path d="M${x} ${y} l${(rnd()*4-2).toFixed(1)} 4"/>`;}).join("")+`</g>`;
-    else if(tabby==="24") marks=M+`<g fill="${ink}" opacity=".28">`+Array.from({length:9},()=>{
-        const a=rnd()*6.28,d=.4+rnd()*.5;
-        return `<ellipse cx="${(50+Math.cos(a)*rx*d).toFixed(1)}" cy="${(57+Math.sin(a)*ry*d).toFixed(1)}" rx="3" ry="2.4"/>`;}).join("")+`</g>`;
-    else if(tabby==="23") marks=M+`<g ${st} stroke-width="2.6"><path d="M22 50 v16 M28 46 v22 M78 50 v16 M72 46 v22"/></g>`;
-    else if(tabby==="22") marks=M+`<g ${st} stroke-width="3"><path d="M20 52 q8 10 0 20 M80 52 q-8 10 0 20"/></g>`;
+        const a=rnd()*6.28,d=.35+rnd()*.48;
+        return `<path d="M${(50+Math.cos(a)*34*d).toFixed(1)} ${(56+Math.sin(a)*33*d).toFixed(1)} l${(rnd()*4-2).toFixed(1)} 4"/>`;}).join("")+`</g>`;
+    else if(tabby==="24") marks=M+`<g fill="${ink}" opacity=".26">`+Array.from({length:9},()=>{
+        const a=rnd()*6.28,d=.4+rnd()*.45;
+        return `<ellipse cx="${(50+Math.cos(a)*34*d).toFixed(1)}" cy="${(56+Math.sin(a)*33*d).toFixed(1)}" rx="3" ry="2.4"/>`;}).join("")+`</g>`;
+    else if(tabby==="23") marks=M+`<g ${st} stroke-width="2.6"><path d="M21 52 v15 M28 47 v22 M79 52 v15 M72 47 v22"/></g>`;
+    else if(tabby==="22") marks=M+`<g ${st} stroke-width="3"><path d="M19 53 q9 10 1 19 M81 53 q-9 10 -1 19"/></g>`;
     else marks=M;
   }
 
-  /* how much white the number calls for */
   const W=C.white;
   const whiteShape=
-    white==="01"?`<ellipse cx="50" cy="66" rx="${rx}" ry="${ry}" fill="${W}"/><rect x="8" y="52" width="84" height="46" fill="${W}"/>`
-   :white==="02"?`<path d="M50 26 q7 10 9 22 H95 V98 H5 V48 H41 q2-12 9-22Z" fill="${W}"/>`
-   :white==="03"?`<path d="M50 44 q9 0 11 14 q14 4 14 20 v18 H25 v-18 q0-16 14-20 q2-14 11-14Z" fill="${W}"/>`
-   :white?`<ellipse cx="50" cy="82" rx="15" ry="11" fill="${W}"/>`:"";
+    white==="01"?`<path d="M50 34C74 34 90 50 90 62C90 82 72 95 50 95C28 95 10 82 10 62C10 50 26 34 50 34Z" fill="${W}"/>`
+   :white==="02"?`<path d="M50 27q6 11 8 23H95V98H5V50H42q2-12 8-23Z" fill="${W}"/>`
+   :white==="03"?`<path d="M50 47q8 0 10 13q13 4 13 18v20H27V78q0-14 13-18q2-13 10-13Z" fill="${W}"/>`
+   :white?`<ellipse cx="50" cy="81" rx="14" ry="10" fill="${W}"/>`:"";
 
-  /* longhair gets a soft scalloped ruff rather than spikes */
   const ruff=meta.longhair?(()=>{
-    const N=13,inr=[],out=[];
+    const N=14,inr=[],out=[];
     for(let i=0;i<N;i++){
       const a=(i/N)*6.28,b=((i+.5)/N)*6.28;
-      inr.push(`${(50+Math.cos(a)*rx*.95).toFixed(1)} ${(57+Math.sin(a)*ry*.95).toFixed(1)}`);
-      out.push(`${(50+Math.cos(b)*rx*1.24).toFixed(1)} ${(57+Math.sin(b)*ry*1.24).toFixed(1)}`);
+      inr.push(`${(50+Math.cos(a)*37).toFixed(1)} ${(56+Math.sin(a)*36).toFixed(1)}`);
+      out.push(`${(50+Math.cos(b)*46).toFixed(1)} ${(56+Math.sin(b)*45).toFixed(1)}`);
     }
     let d=`M${inr[0]}`;
     for(let i=0;i<N;i++)d+=` Q${out[i]} ${inr[(i+1)%N]}`;
@@ -557,23 +568,23 @@ function face(node){
   })():"";
 
   return `<svg viewBox="0 0 100 100" aria-hidden="true">
-  <defs><clipPath id="${id}"><ellipse cx="50" cy="57" rx="${rx}" ry="${ry}"/></clipPath></defs>
+  <defs><clipPath id="${id}"><path d="${HEAD}"/></clipPath></defs>
   ${ruff}
-  <g transform="rotate(${tilt} 50 57)">
-    <path d="M17 40 L14 12 L42 27 Z" fill="${base}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M83 40 L86 12 L58 27 Z" fill="${second||base}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M21 34 L20 20 L36 28 Z" fill="#E9A7B4"/><path d="M79 34 L80 20 L64 28 Z" fill="#E9A7B4"/>
+  <g transform="rotate(${tilt} 50 56)">
+    <path d="${EAR_L}" fill="${base}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="${EAR_R}" fill="${second||base}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="${INR_L}" fill="#E9A7B4"/><path d="${INR_R}" fill="#E9A7B4"/>
   </g>
-  <ellipse cx="50" cy="57" rx="${rx}" ry="${ry}" fill="${base}"/>
+  <path d="${HEAD}" fill="${base}"/>
   <g clip-path="url(#${id})">${tortie}${marks}${whiteShape}</g>
-  <ellipse cx="50" cy="57" rx="${rx}" ry="${ry}" fill="none" stroke="${ink}" stroke-width="3"/>
-  <g class="eyes"><circle cx="36" cy="54" r="8.5" fill="${eyeL}" stroke="${ink}" stroke-width="2.5"/><circle cx="64" cy="54" r="8.5" fill="${eyeR}" stroke="${ink}" stroke-width="2.5"/></g>
-  <g class="pupils"><ellipse cx="36" cy="54" rx="3.4" ry="5" fill="${ink}"/><ellipse cx="64" cy="54" rx="3.4" ry="5" fill="${ink}"/></g>
-  <path d="M46 68 h8 l-4 5 Z" fill="#C96E7E"/>
-  <path d="M50 73 q-5 6 -10 2 M50 73 q5 6 10 2" stroke="${ink}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="${HEAD}" fill="none" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+  <g class="eyes"><circle cx="35" cy="54" r="9" fill="${eyeL}" stroke="${ink}" stroke-width="2.5"/><circle cx="65" cy="54" r="9" fill="${eyeR}" stroke="${ink}" stroke-width="2.5"/></g>
+  <g class="pupils"><ellipse cx="35" cy="54" rx="3.5" ry="5.2" fill="${ink}"/><ellipse cx="65" cy="54" rx="3.5" ry="5.2" fill="${ink}"/></g>
+  <path d="M46.5 67h7l-3.5 4.5Z" fill="#C96E7E"/>
+  <path d="M50 71.5q-4.5 5.5-9 2 M50 71.5q4.5 5.5 9 2" stroke="${ink}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
   <g stroke="${ink}" stroke-width="2" stroke-linecap="round" opacity=".45" fill="none">
-    <path d="M22 62 q-${wsk} -3 -${(wsk*1.5).toFixed(1)} -6 M22 68 q-${wsk} 2 -${(wsk*1.5).toFixed(1)} 3
-             M78 62 q${wsk} -3 ${(wsk*1.5).toFixed(1)} -6 M78 68 q${wsk} 2 ${(wsk*1.5).toFixed(1)} 3"/></g></svg>`;
+    <path d="M24 62 q-${wsk} -3 -${(wsk*1.4).toFixed(1)} -6 M24 68 q-${wsk} 2 -${(wsk*1.4).toFixed(1)} 3
+             M76 62 q${wsk} -3 ${(wsk*1.4).toFixed(1)} -6 M76 68 q${wsk} 2 ${(wsk*1.4).toFixed(1)} 3"/></g></svg>`;
 }
 
 /* ---------- collect generations ---------- */
@@ -725,6 +736,35 @@ function rankOf(node){
   const w=WORD[toks[0].toLowerCase().split("-")[0]];
   return w||"·";
 }
+/* Builds a few real sentences out of whatever the paperwork gives us, rather
+   than restating the code. Everything here is derived, nothing invented. */
+function story(node){
+  const m=codeMeta(node.code), solid=node.cols.filter(c=>c!=="white");
+  const out=[];
+  const lead=says(node);
+  out.push(lead.charAt(0).toUpperCase()+lead.slice(1)+".");
+  if(node.desc&&node.desc.toLowerCase()!==lead.toLowerCase())
+    out.push(`The certificate writes it as “${node.desc}”.`);
+  if(solid.length>1)
+    out.push("A tortoiseshell — two colours mixed through the coat rather than laid in patches. Torties are almost always female, since the two colours ride on the X chromosome.");
+  if(m.white==="01") out.push("The <b>01</b> is a van pattern: white almost everywhere, with colour left only on the head and tail.");
+  else if(m.white==="02") out.push("The <b>02</b> means harlequin — mostly white, with colour broken across it.");
+  else if(m.white==="03") out.push("The <b>03</b> is what gives the white bib and paws.");
+  else if(node.cols.includes("white")) out.push("White through the chest and paws.");
+  /* the UK side has no letter code, so fall back to what the tree records */
+  const tab=m.tabby||(node.tabby?"25":null);
+  if(tab==="25") out.push("Ticked, so each hair is banded along its length instead of forming stripes — the coat shimmers rather than patterns.");
+  else if(tab==="24") out.push("Spotted, the markings broken into rosettes.");
+  else if(tab==="23") out.push("Mackerel — narrow parallel stripes down the flanks.");
+  else if(tab==="22") out.push("Classic tabby, the broad swirled markings.");
+  if(m.longhair) out.push("A British <b>Longhair</b> — the same cat with a long coat, and the one exception in a family of shorthairs.");
+  if(m.eyes==="62") out.push("Someone thought the eyes worth recording: <b>62</b>, deep orange.");
+  else if(m.eyes==="63") out.push("Odd-eyed — one blue, one orange.");
+  if(node.health) out.push(`Screened <b>${node.health}</b>.`);
+  if(!plain(node.code)&&!node.found)
+    out.push("Registered the UK way — a GCCF breed number rather than a letter code, which is why this one reads differently from his dad's side.");
+  return out.join(" ");
+}
 function showCat(node,rel,gen){
   const pcard=document.getElementById("pcard");
   pcard.classList.remove("flipped");
@@ -748,10 +788,7 @@ function showCat(node,rel,gen){
   document.getElementById("catgen").textContent=gen===undefined?"":depth[gen]||"";
 
   document.getElementById("cattitle").textContent=node.title?(TITLEWHAT[node.title]||node.title):"";
-  const written=node.desc&&node.desc.toLowerCase()!==says(node).toLowerCase()
-    ? ` The certificate writes it as “${node.desc}”.` : "";
-  document.getElementById("catdesc").innerHTML=
-    `${says(node)}.${written} The portrait is drawn from those codes — colours, amount of white, markings and eyes all come off the paperwork.`;
+  document.getElementById("catdesc").innerHTML=story(node);
   document.getElementById("catcode").innerHTML=
     codeRows(node.code).map(([t,d])=>`<div><dt>${t}</dt><dd>${d}</dd></div>`).join("");
   const bits=[];
@@ -828,7 +865,29 @@ document.addEventListener("click",e=>{
 (()=>{const b=new Date(2025,7,23),now=new Date();
  let m=(now.getFullYear()-b.getFullYear())*12+now.getMonth()-b.getMonth();
  if(now.getDate()<b.getDate())m--;
- document.getElementById("age").textContent=m<12?m+" months":Math.floor(m/12)+"y "+(m%12)+"m";})();
+ document.getElementById("age").textContent=m<12?m+" months":Math.floor(m/12)+"y "+(m%12)+"m";
+ /* 23 August. Fires on its own every year. */
+ if(now.getMonth()===7&&now.getDate()===23){
+   const yrs=now.getFullYear()-b.getFullYear();
+   const ord=yrs===1?"first":yrs===2?"second":yrs===3?"third":yrs+"th";
+   const el=document.getElementById("bday");
+   el.innerHTML=`🎂 It's his ${ord} birthday`;el.hidden=false;
+   document.title="🎂 "+document.title;
+   addEventListener("load",()=>setTimeout(()=>{
+     const r=document.querySelector("#bigcat")?.getBoundingClientRect();
+     if(r)confetti(r.left+r.width/2,r.top+r.height/2);
+     say(`<b>Happy birthday, Yoshi.</b> ${ord.charAt(0).toUpperCase()+ord.slice(1)} one — born 23 August 2025.`);
+   },700));
+ }})();
+function confetti(x,y){
+  for(let i=0;i<26;i++){const p=document.createElement("div");p.className="paw";
+    p.textContent=["🐾","🎂","🎉","🧶","⭐"][i%5];
+    p.style.left=(x-10)+"px";p.style.top=(y-10)+"px";
+    p.style.setProperty("--dx",(Math.random()*300-150)+"px");
+    p.style.setProperty("--r",(Math.random()*360-180)+"deg");
+    p.style.animationDelay=(i*40)+"ms";document.body.appendChild(p);
+    setTimeout(()=>p.remove(),1900);}
+}
 
 /* ================================================================
    HEALTH LOG
@@ -1057,6 +1116,15 @@ mapEl.querySelectorAll(".lk").forEach(pth=>{
 const draw=()=>{mapEl.classList.remove("go");void mapEl.offsetWidth;mapEl.classList.add("go");};
 new IntersectionObserver((es,ob)=>{es.forEach(e=>{if(e.isIntersecting){draw();ob.disconnect();}});},
   {threshold:.12}).observe(mapEl);
+(()=>{
+  const box=document.getElementById("mapsvg"), btn=document.getElementById("fitmap");
+  /* On a phone a 1700px-wide diagram is a maze, so start zoomed out. */
+  let fit=innerWidth<820;
+  const paint=()=>{box.classList.toggle("fit",fit);
+    btn.textContent=fit?"⤢ Zoom in":"⤢ Fit to screen";
+    btn.setAttribute("aria-pressed",String(fit));};
+  paint(); btn.onclick=()=>{fit=!fit;paint();};
+})();
 document.getElementById("replay").onclick=()=>{mapEl.classList.remove("picked");
   mapEl.querySelectorAll(".lit").forEach(x=>x.classList.remove("lit"));draw();};
 
