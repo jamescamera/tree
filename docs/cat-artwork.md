@@ -1,49 +1,71 @@
 # The generated cat portraits
 
 `assets/cats/*.webp` are pre-rendered British Shorthair portraits, chosen per cat
-by `fur.js` from `node.cols` and the EMS code. This note records what was done to
-them and why, because the change is not reversible from what is in the tree.
+by `fur.js` from `node.cols` and the EMS code. This note records how they are
+made, what the failures were, and what to ask for next time.
 
-## What arrived
+## How to commission them
 
-The artwork was delivered as 35 full-body cutouts — a sitting cat on
-transparency. The painting itself is good. The alpha channel is not.
+Ask for the cats **on a flat, saturated backdrop, un-cut**. Do not accept a
+finished cutout.
 
-The mattes had eaten into the cats. On a light page this mostly hides; composited
-over a saturated colour it is obvious:
+This matters more than it sounds. Every British Shorthair colour is desaturated
+by definition, so a neutral studio backdrop sits right on top of the coat: across
+the four million fur pixels in this set, **29% are within ΔRGB 60 of the pale grey
+backdrop the first batch used, and the closest are identical to it**. No matter
+who does the cutout, it is guessing at that point — which is why the first batch
+came back with amputated paws and, in two cases, no head.
 
-| Asset | Damage |
-|---|---|
-| `black-white-03` | body gone below the chest — a head above a white ribbon |
-| `blue` | lower right quarter missing, paws amputated, ragged tail stub |
-| `lilac-white-03`, `chocolate-white-03` | legs cut away, bite out of one flank |
-| `black-smoke` | lower body chewed off along a ragged edge |
-| `cream`, `cream-white-03`, `cinnamon`, `chocolate`, `brown-tabby`, `white`, and others | paws sliced off flat at the base |
-| `tabby` | deep notch through the top of the skull, ears detached |
-| `grace-dominica-blh` | head erased entirely — a ruff and an ear tuft |
+| Backdrop | Min ΔRGB to any fur pixel | Fur within ΔRGB 60 |
+|---|---|---|
+| Pale grey studio | 1 | 29.3% |
+| White | 0 | 7.1% |
+| Green | 111 | 0% |
+| Cyan | 145 | 0% |
+| Magenta | 179 | 0% |
 
-Nothing could be repaired. WebP zeroes the colour channels wherever alpha is 0,
-so the pixels under the holes are not merely hidden, they are gone: sampling RGB
-in the transparent regions returns near-black compression noise, not fur.
+Any saturated colour is safe; cyan is what the current set used. Two further
+requirements: the backdrop must be **flat, not a gradient** — a gradient needs a
+different threshold at the top than the bottom — and the cut must not be applied,
+because WebP zeroes the colour channels wherever alpha is 0. Once a bad matte is
+baked in, the pixels under the holes are gone and no repair is possible.
 
-## What was done
+## How they are processed here
 
-All the damage sits below the chest, so **the assets are stored cropped to a
-bust** — the top 58% of the cat's own bounding box, re-tightened horizontally,
-padded 6% and squared. Alpha is then ramped to zero (smoothstepped) over the
-bottom 18%, so the crop line dissolves rather than showing as a straight cut.
-Output is 512×512, except `yoshi.webp` at 1024×1024 for the hero.
+1. **Despill.** Cyan lifts green and blue above red at the silhouette. Cap both at
+   red. Verified against every asset: this touches *zero* interior pixels, so it
+   only ever neutralises the fringe and can be applied globally.
+2. **Bust crop** to the top 60% of the cat's bounding box — 80% for Grace, below.
+3. **Fade** alpha to zero, smoothstepped, over the bottom 18%, so the crop line
+   dissolves instead of showing as a straight cut.
+4. **Square on the head**, not on the widest part of the body: side = crop height
+   × 1.16, centred on the head's horizontal midpoint. Squaring on the body leaves
+   a full-body source small in a lot of empty canvas.
+5. 512×512 WebP, quality 88. `yoshi.webp` is 1024 from a 1224px source and is
+   *not* replaced by a 512 one — the hero renders at 260 CSS px and the difference
+   is obvious.
 
-This is also a better portrait than the full body was at 160px, and it made the
-set 4.4 MB → 1.1 MB.
+Both slots that use these — `.portrait` and `.bigcat` — are square, so the CSS is
+`object-fit: contain; object-position: center`.
 
-Both slots that use these images — `.portrait` and `.bigcat` — are square, so the
-CSS is `object-fit: contain; object-position: center`.
+## Substitutions, all deliberate
 
-`tabby.webp` and `grace-dominica-blh.webp` were deleted: their heads were the
-damaged part, so there was nothing left to crop to. `fur.js` now sends tabbies
-that are neither blue nor chocolate to `brown-tabby`, and picks longhairs by
-colour like everyone else — Grace Dominica loses her coat length in the picture.
-Two new renders would bring both back; nothing else needs to change.
+- **Red → cream**, no red artwork exists.
+- **Cinnamon tortie → cinnamon**, likewise. This is why Hennessy Olivia Charm
+  shows as a solid cinnamon despite being `BSH q 03`.
+- **Tabbies that are neither blue nor chocolate → brown tabby**, no generic
+  tabby artwork.
+- **Grace Dominica** is `BLH p 03` — fawn and white — but the longhair artwork is
+  a silver-grey cat. Coat length wins over colour for her, because the coat is the
+  whole reason she stands out on this tree. Her crop keeps more chest than the
+  others so the ruff actually reads; at the standard 60% she looks shorthaired.
 
-The originals are in git history at commit `4febd11`.
+## Still on the old batch
+
+Three assets carry 13 of the 45 cats and are still from the original grey-backdrop
+batch: `lilac` (5 cats), `cream-white-03` (5) and `cream` (3). They are undamaged,
+but the face shape differs slightly from the cyan set. A follow-up render of those
+three on cyan would make the set uniform.
+
+Earlier states are in git history: the original full-body cutouts at `4febd11`,
+the first bust crop at `16adfc0`.

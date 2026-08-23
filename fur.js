@@ -22,18 +22,19 @@ const HAVE = new Set(["yoshi","blue","blue-white-01","blue-white-02","blue-white
  "blue-white-harlequin","blue-tabby","blue-tortie","lilac","lilac-white-03","cream",
  "cream-white-03","chocolate","chocolate-white-03","cinnamon","fawn","black",
  "black-white-03","white","black-smoke","blue-point","lilac-point","chocolate-point",
- "brown-tabby","tortie","blue-cream-tortie","lilac-cream-tortie",
+ "brown-tabby","tortie","blue-cream-tortie","lilac-cream-tortie","grace-dominica-blh",
  "chocolate-tortie","blue-cream-white-03","silver-shaded","golden-shaded",
  "mum-blue-white-03","dad-blue"]);
 
 /* No red or cinnamon-tortie artwork exists yet, so those fall to their nearest
    relative rather than to a default. Noted rather than hidden.
 
-   Two more substitutions are forced rather than chosen: the generic tabby and
-   the longhair pictures both arrived with the cat's head cut away by the
-   background matte, and the RGB under the alpha is zeroed, so there is nothing
-   to recover. Tabbies that are neither blue nor chocolate use the brown tabby;
-   longhairs are picked by colour like everyone else and lose their coat length. */
+   Tabbies that are neither blue nor chocolate use the brown tabby, there being
+   no generic tabby artwork. And Grace Dominica is a British Longhair, so coat
+   length wins over colour for her: the longhair artwork is a silver-grey cat
+   and her code says BLH p 03, fawn and white. A shorthair in the right colour
+   read worse than a longhair in the wrong one, since her coat is the whole
+   reason she stands out on this tree. */
 const NEAREST = { red: "cream", cinnamon: "cinnamon", fawn: "fawn", black: "black",
                   blue: "blue", lilac: "lilac", cream: "cream", chocolate: "chocolate" };
 
@@ -47,6 +48,7 @@ function pick(node){
   const white = meta.white || (cols.includes("white") ? "03" : null);
   const tabby = meta.tabby || (node.tabby ? "25" : null);
 
+  if (meta.longhair) return "grace-dominica-blh";
   if (!solid.length) return "white";
 
   const base = NEAREST[solid[0]] || "blue";
