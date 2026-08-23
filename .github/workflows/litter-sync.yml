@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: litter-sync
@@ -34,6 +35,24 @@ jobs:
           WHISKER_PASSWORD: ${{ secrets.WHISKER_PASSWORD }}
           LITTER_WEIGHT_UNIT: ${{ vars.LITTER_WEIGHT_UNIT || 'lb' }}
         run: python scripts/litter_sync.py
+
+      # An issue is the simplest way to actually reach someone - GitHub emails
+      # the repo owner when one is opened. Only fires on a change that wasn't
+      # already flagged, so it can't nag every morning.
+      - name: Raise a flag if something changed
+        if: hashFiles('data/watch-alert.txt') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          body=$(cat data/watch-alert.txt)
+          jq -n --arg t "Yoshi: something changed in the litter box data" \
+                --arg b "$body" '{title:$t, body:$b, labels:["watch"]}' > issue.json
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/issues" \
+            -d @issue.json | jq -r '.html_url // .message'
+          rm -f data/watch-alert.txt issue.json
 
       - name: Commit anything new
         run: |
