@@ -1,3 +1,8 @@
+> **Superseded.** The WebGL/GLB route was retired in favour of pre-rendered
+> artwork in `assets/cats/`. Kept as the record of what was measured and why,
+> in case a modelled cat is ever revisited. The model, the three.js vendor
+> files and the validator went with it and remain in git history.
+
 # British Shorthair 3D tree — corrected implementation
 
 This is the second-pass implementation after the first GLB was rejected for exactly the two issues that matter: it looked like glued primitives and its UVs did not encode a belly-to-spine gradient.
