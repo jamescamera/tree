@@ -214,10 +214,10 @@ body.locked .gate{display:flex}
 
 .portrait{width:54%;aspect-ratio:1;margin:10px 0 4px}
 .portrait svg,.portrait canvas,.portrait img{width:100%;height:100%;display:block}
-/* the generated artwork is a tall sitting cat on transparency, so contain it
-   and sit it on the floor of its box rather than letting it overflow */
-.portrait img,img.generated-cat-detail{object-fit:contain;object-position:center bottom}
-img.bigcat{object-fit:contain;object-position:center bottom}
+/* the generated artwork is a square bust on transparency, and both slots are
+   square, so contain it and let it fill the box */
+.portrait img,img.generated-cat-detail{object-fit:contain;object-position:center}
+img.bigcat{object-fit:contain;object-position:center}
 .pinfo{text-align:center;padding:0 6px}
 #cat .rel{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--grape-soft)}
 #cat h3{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.18rem;margin:4px 0 5px;letter-spacing:-.02em;line-height:1.12}
