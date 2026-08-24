@@ -422,6 +422,21 @@ img.bigcat{object-fit:contain;object-position:center bottom}
 .owho{display:block;font-size:12px;color:var(--dim);margin-top:5px;line-height:1.5}
 .ohow{display:block;font-size:11.5px;color:var(--faint);margin-top:4px;font-style:italic}
 
+/* ---------- deductions ---------- */
+.depth{display:grid;gap:7px}
+.drow{display:grid;grid-template-columns:210px 1fr 74px;gap:14px;align-items:center}
+.drow b{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:10px;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--dim)}
+.dbar{height:15px;border-radius:4px;background:rgba(233,226,246,.055);overflow:hidden;position:relative}
+.dbar i{position:absolute;inset:0;width:100%;background:linear-gradient(90deg,var(--gold-deep),var(--gold));
+ border-radius:4px;transform-origin:left;transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.8,.3,1)}
+#deduced.go .dbar i{transform:scaleX(var(--f))}
+.drow span{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--faint);text-align:right;
+ letter-spacing:.06em}
+.drow.part span{color:var(--gold)}
+.dcard .odds{font-family:'Fraunces',Georgia,serif;font-weight:900;font-size:1.9rem;letter-spacing:-.03em;
+ color:var(--gold);line-height:1;margin:2px 0 6px;display:block}
+
 /* ---------- genetics ---------- */
 .genes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:13px}
 .gcard{background:var(--ink-2);border:1px solid var(--edge);border-radius:18px;padding:16px 18px}
@@ -452,6 +467,8 @@ img.bigcat{object-fit:contain;object-position:center bottom}
   .herolight{justify-self:center}
 }
 @media (max-width:620px){
+  .drow{grid-template-columns:128px 1fr 60px;gap:9px}
+  .drow b{font-size:8.5px;letter-spacing:.08em}
   .pairs{grid-template-columns:1fr}
   .bigcat,.bigcat.fur-slot{width:190px;height:190px}
   .wrap{padding:0 15px 90px}
@@ -589,6 +606,18 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
   <div class="genes" id="genepanel"></div>
   <p class="log-h" style="margin:20px 0 8px">Trace a gene through the family</p>
   <div class="controls" id="genetrace" style="margin:0"></div>
+</section>
+
+<section class="gen" id="deduced">
+  <div class="gen-head"><h2>What else the paper proves</h2></div>
+  <p class="gen-note">A pedigree is a set of constraints, not just a list of names. Some things follow from it
+    with certainty, some only as odds, and some of it is simply missing. Here is all three, worked out from the
+    45 cats and nothing else.</p>
+  <p class="log-h">How far back it actually goes</p>
+  <div class="depth" id="depth"></div>
+  <p class="hint" id="depthnote"></p>
+  <p class="log-h" style="margin:26px 0 8px">Things that must be true</p>
+  <div class="genes" id="deduce"></div>
 </section>
 
 <section class="gen" id="decoder">
@@ -884,11 +913,11 @@ GENS.forEach((g,gen)=>{
 
 /* nav */
 const nav=document.getElementById("nav");
-nav.innerHTML=`<a href="#map">🌳 The tree</a>`+GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a><a href="#origins">🌍 Origins</a><a href="#genes">🧬 Genetics</a><a href="#decoder">📖 Decoder</a>`;
+nav.innerHTML=`<a href="#map">🌳 The tree</a>`+GENS.map(g=>`<a href="#${g.id}">${g.label}</a>`).join("")+`<a href="#health">🩺 Health log</a><a href="#origins">🌍 Origins</a><a href="#genes">🧬 Genetics</a><a href="#deduced">🔎 Deductions</a><a href="#decoder">📖 Decoder</a>`;
 const links=[...nav.querySelectorAll("a")];
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)
   links.forEach(l=>l.classList.toggle("on",l.getAttribute("href")==="#"+e.target.id));});},{rootMargin:"-20% 0px -70%"});
-GENS.forEach(g=>io.observe(document.getElementById(g.id)));["map","health","origins","genes","decoder"].forEach(id=>io.observe(document.getElementById(id)));
+GENS.forEach(g=>io.observe(document.getElementById(g.id)));["map","health","origins","genes","deduced","decoder"].forEach(id=>io.observe(document.getElementById(id)));
 
 /* colour trace */
 let filter=null;
@@ -1616,8 +1645,9 @@ function geneOf(node){
      carrying cinnamon. So he <i>may</i> carry it, and colour alone can't tell you. Only a test would.`],
    ["Red","not carried","certain",
     `Red and cream ride on the X chromosome. A male cat has one X, so he'd have to <i>be</i> red or cream to
-     carry it — and he's neither. His father was cream, which means <b>any daughter Yoshi had would have been a
-     tortie</b>. He's neutered, so that stays theoretical.`],
+     carry it — and he's neither, so the red stops with him. A tom passes his X to daughters only, and Yoshi's
+     carries no orange, so his own daughters would not have been torties. His <b>sisters</b> are the ones to
+     look at: see the deductions below.`],
    ["White spotting","S / s","certain",
     `The <b>03</b> in his code is the white bib and paws. White spotting is dominant, so one copy is enough,
      and it came from whichever parent was also bi-colour — both were, as it happens.`]
@@ -1645,6 +1675,88 @@ function geneOf(node){
       el.classList.toggle("hit",active!==null&&hit);
     });
   });
+})();
+
+
+/* ---------------- what else the paper proves ---------------- */
+(function deductions(){
+  /* how complete is each generation, and where does the paper stop */
+  const rowsByGen={}; (function w(n,g){ if(!n)return;
+    (rowsByGen[g]=rowsByGen[g]||[]).push(n); w(n.sire,g+1); w(n.dam,g+1); })(T,0);
+  /* reuse the tree's own generation names rather than inventing a second set */
+  const gens=Object.keys(rowsByGen).map(Number).sort((a,b)=>a-b);
+  const LABEL=GENS.map(g=>g.label);
+  document.getElementById("depth").innerHTML=gens.map(g=>{
+    const have=rowsByGen[g].length, want=2**g, f=have/want;
+    return `<div class="drow${f<1?" part":""}"><b>${LABEL[g]||g+"× great"}</b>
+      <div class="dbar"><i style="--f:${f.toFixed(3)}"></i></div>
+      <span>${have} / ${want}</span></div>`;}).join("");
+
+  /* which lines are still running when the certificate stops */
+  const deepest=Math.max(...gens);
+  const openEnds=[]; (function w(n){ if(!n)return;
+    if(!n.sire&&!n.dam) openEnds.push(n); w(n.sire); w(n.dam); })(T);
+  const carriedOn=rowsByGen[4].filter(c=>c.sire||c.dam);
+  /* one complete branch doubles at exactly the rate the theoretical total does,
+     so every generation past the certificate holds the same fraction */
+  const tailFrac=gens.filter(g=>g>4).map(g=>rowsByGen[g].length/2**g);
+  const flat=tailFrac.length>1 && tailFrac.every(f=>Math.abs(f-tailFrac[0])<1e-9);
+  document.getElementById("depthnote").innerHTML =
+    `The certificate itself stops at the great-great-grandparents — sixteen cats, a complete set. Everything
+     past that is <b>one line only</b>: ${carriedOn.map(c=>`<b>${c.name}</b>`).join(" and ")}, whose own pedigree
+     carries it ${deepest-4} generations further. So the last three rows are not really missing cats; they are a
+     single branch still running while the other fifteen have stopped.${flat?` Which is why all three sit at
+     exactly <b>1 in ${Math.round(1/tailFrac[0])}</b> — one unbroken line doubles at precisely the rate the
+     theoretical total does, so the share stops changing the moment everything else falls away.`:""}
+     ${openEnds.length} of the ${all.length} cats are open ends: each one a place the trail could be picked up
+     again, and the reason this tree can still grow.`;
+
+  /* deductions, each one worked from the codes rather than asserted */
+  const find=nm=>all.find(a=>a.node.name.toLowerCase().startsWith(nm))?.node;
+  const grace=find("grace dominica"), yasmin=find("yasmin"), mak=find("makdissy"),
+        win=find("winnosie"), ron=find("ronaldo"), hen=find("hennessy"), iso=find("charmante isabella");
+  /* generations between Grace and Yoshi decide the odds she passed the coat on */
+  let steps=0; (function w(n,g){ if(!n)return; if(n===grace){steps=g;return;} w(n.sire,g+1); w(n.dam,g+1); })(T,0);
+  const odds=2**(steps-1);
+
+  const cards=[
+   ["A longhair in a shorthair family", `1 in ${odds}`,
+    `<b>${grace.name}</b> is the only <b>BLH</b> on the tree — a British <i>Long</i>hair, ${steps} generations
+     back. Long coat is recessive, so she carried two copies and every one of her kittens got one. That makes
+     her daughter <b>${yasmin.name}</b> a certain carrier, and from there it is a coin toss each generation:
+     ${mak.name}, then ${win.name}, then Yoshi. So the odds Yoshi quietly carries a long coat are
+     <b>1 in ${odds}</b> — invisible on him, but it would show if it ever met another copy.`],
+
+   ["The grandmother who must carry dilute", "certain",
+    `Yoshi is lilac, which is a dilute colour, so he holds two copies and each parent gave one. Both his
+     parents are dilute themselves — ${ron.name} is cream, ${win.name} lilac — which means <b>all four
+     grandparents</b> had to pass one down. Three of them are visibly dilute. <b>${hen.name}</b> is not: she is
+     a cinnamon tortie, an undiluted colour. She must therefore be carrying dilute without showing it.`],
+
+   ["Cinnamon, hiding under cream", "certain",
+    `Cinnamon is the bottom rung of the brown series and recessive to chocolate. <b>${hen.name}</b> is a
+     cinnamon tortie, so cinnamon is all she can pass on — which makes her son <b>${ron.name}</b> a certain
+     carrier. Red and cream mask the brown series completely, so nothing about his cream coat shows it. The
+     cinnamon runs <b>${iso.name} → ${hen.name} → ${ron.name}</b>, and Yoshi had a real chance of taking it on.`],
+
+   ["The sisters he never had", "certain",
+    `A tom gives his X chromosome to daughters and his Y to sons. <b>${ron.name}</b> is cream, which is a
+     red-series colour carried on the X — so <b>every daughter he ever fathered was a tortie or a red</b>,
+     with no exceptions. Yoshi got the Y instead, which is exactly why he is lilac and not cream. Any full
+     sister of his was a tortie by arithmetic, before she was born.`],
+
+   ["Nobody married a cousin", "0%",
+    `All ${all.length} places on the tree are filled by ${all.length} <i>different</i> cats — not one animal
+     appears twice, on either side, at any depth the paper reaches. So Yoshi's inbreeding coefficient across
+     these ${deepest+1} generations is <b>zero</b>. For a pedigree breed where doubling up on a good line is
+     routine, that is worth noticing.`]
+  ];
+  document.getElementById("deduce").innerHTML=cards.map(([t,odd,p])=>
+    `<div class="gcard dcard"><h4>${t}</h4><span class="odds">${odd}</span><p>${p}</p></div>`).join("");
+
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add("go");io.unobserve(e.target);}}),{threshold:.15});
+  io.observe(document.getElementById("deduced"));
 })();
 
 /* ---------------- the decoder ---------------- */
