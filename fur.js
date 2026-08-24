@@ -24,15 +24,12 @@ const HAVE = new Set(["yoshi","blue","blue-white-01","blue-white-02","blue-white
  "black-white-03","white","black-smoke","blue-point","lilac-point","chocolate-point",
  "brown-tabby","tortie","blue-cream-tortie","lilac-cream-tortie","grace-dominica-blh",
  "chocolate-tortie","blue-cream-white-03","silver-shaded","golden-shaded",
- "mum-blue-white-03","dad-blue"]);
+ "mum-blue-white-03","dad-blue","red-white-03"]);
 
-/* No red or cinnamon-tortie artwork exists yet, so those fall to their nearest
-   relative rather than to a default. Noted rather than hidden.
-
-   Tabbies that are neither blue nor chocolate use the brown tabby, there being
+/* Tabbies that are neither blue nor chocolate use the brown tabby, there being
    no generic tabby artwork. Grace Dominica is no longer a substitution: the
    longhair artwork is now fawn and white, which is what BLH p 03 says she is. */
-const NEAREST = { red: "cream", cinnamon: "cinnamon", fawn: "fawn", black: "black",
+const NEAREST = { red: "red", cinnamon: "cinnamon", fawn: "fawn", black: "black",
                   blue: "blue", lilac: "lilac", cream: "cream", chocolate: "chocolate" };
 
 function pick(node){
@@ -53,7 +50,7 @@ function pick(node){
   if (solid.length > 1) {                       /* tortoiseshell */
     if (base === "lilac") return "lilac-cream-tortie";
     if (base === "chocolate") return "chocolate-tortie";
-    if (base === "cinnamon") return "cinnamon";
+    if (base === "cinnamon") return "cinnamon"; // no usable cinnamon-tortie source yet
     if (base === "blue") return white ? "blue-cream-white-03" : "blue-cream-tortie";
     return "tortie";
   }

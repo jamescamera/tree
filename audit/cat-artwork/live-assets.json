@@ -1,0 +1,667 @@
+[
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 4,
+    "debris_pixels": 4,
+    "holes_pixels": 6,
+    "cyan_rim_pixels": 438,
+    "head_scale": 0.6133,
+    "magenta_verification": "audit/cat-artwork/live-magenta/black-smoke-magenta.png",
+    "asset": "assets/cats/black-smoke.webp",
+    "mode": "RGBA",
+    "source_detail_score": 25.723,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.6211,
+    "magenta_verification": "audit/cat-artwork/live-magenta/black-white-03-magenta.png",
+    "asset": "assets/cats/black-white-03.webp",
+    "mode": "RGBA",
+    "source_detail_score": 29.348,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 4,
+    "debris_pixels": 3,
+    "holes_pixels": 9,
+    "cyan_rim_pixels": 361,
+    "head_scale": 0.6172,
+    "magenta_verification": "audit/cat-artwork/live-magenta/black-magenta.png",
+    "asset": "assets/cats/black.webp",
+    "mode": "RGBA",
+    "source_detail_score": 13.406,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 153,
+    "head_scale": 0.6484,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-cream-tortie-magenta.png",
+    "asset": "assets/cats/blue-cream-tortie.webp",
+    "mode": "RGBA",
+    "source_detail_score": 7982.002,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 302,
+    "head_scale": 0.6016,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-cream-white-03-magenta.png",
+    "asset": "assets/cats/blue-cream-white-03.webp",
+    "mode": "RGBA",
+    "source_detail_score": 4108.115,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5801,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-point-magenta.png",
+    "asset": "assets/cats/blue-point.webp",
+    "mode": "RGBA",
+    "source_detail_score": 27.105,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5762,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-tabby-magenta.png",
+    "asset": "assets/cats/blue-tabby.webp",
+    "mode": "RGBA",
+    "source_detail_score": 50.846,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5723,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-tortie-magenta.png",
+    "asset": "assets/cats/blue-tortie.webp",
+    "mode": "RGBA",
+    "source_detail_score": 42.405,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.6211,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-white-01-magenta.png",
+    "asset": "assets/cats/blue-white-01.webp",
+    "mode": "RGBA",
+    "source_detail_score": 34.565,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5977,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-white-02-magenta.png",
+    "asset": "assets/cats/blue-white-02.webp",
+    "mode": "RGBA",
+    "source_detail_score": 37.161,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 3,
+    "cyan_rim_pixels": 766,
+    "head_scale": 0.625,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-white-03-magenta.png",
+    "asset": "assets/cats/blue-white-03.webp",
+    "mode": "RGBA",
+    "source_detail_score": 23.369,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5723,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-white-harlequin-magenta.png",
+    "asset": "assets/cats/blue-white-harlequin.webp",
+    "mode": "RGBA",
+    "source_detail_score": 37.138,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      768,
+      768
+    ],
+    "has_alpha": true,
+    "components": 4,
+    "debris_pixels": 3,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 191,
+    "head_scale": 0.6706,
+    "magenta_verification": "audit/cat-artwork/live-magenta/blue-magenta.png",
+    "asset": "assets/cats/blue.webp",
+    "mode": "RGBA",
+    "source_detail_score": 5718.715,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      768,
+      768
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 1,
+    "cyan_rim_pixels": 252,
+    "head_scale": 0.6328,
+    "magenta_verification": "audit/cat-artwork/live-magenta/brown-tabby-magenta.png",
+    "asset": "assets/cats/brown-tabby.webp",
+    "mode": "RGBA",
+    "source_detail_score": 4176.626,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5977,
+    "magenta_verification": "audit/cat-artwork/live-magenta/chocolate-point-magenta.png",
+    "asset": "assets/cats/chocolate-point.webp",
+    "mode": "RGBA",
+    "source_detail_score": 24.316,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5566,
+    "magenta_verification": "audit/cat-artwork/live-magenta/chocolate-tortie-magenta.png",
+    "asset": "assets/cats/chocolate-tortie.webp",
+    "mode": "RGBA",
+    "source_detail_score": 35.703,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      768,
+      768
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 641,
+    "head_scale": 0.6081,
+    "magenta_verification": "audit/cat-artwork/live-magenta/chocolate-white-03-magenta.png",
+    "asset": "assets/cats/chocolate-white-03.webp",
+    "mode": "RGBA",
+    "source_detail_score": 1568.286,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      768,
+      768
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 7,
+    "head_scale": 0.6406,
+    "magenta_verification": "audit/cat-artwork/live-magenta/chocolate-magenta.png",
+    "asset": "assets/cats/chocolate.webp",
+    "mode": "RGBA",
+    "source_detail_score": 2414.261,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 176,
+    "head_scale": 0.6094,
+    "magenta_verification": "audit/cat-artwork/live-magenta/cinnamon-magenta.png",
+    "asset": "assets/cats/cinnamon.webp",
+    "mode": "RGBA",
+    "source_detail_score": 9527.588,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 84,
+    "head_scale": 0.5938,
+    "magenta_verification": "audit/cat-artwork/live-magenta/cream-white-03-magenta.png",
+    "asset": "assets/cats/cream-white-03.webp",
+    "mode": "RGBA",
+    "source_detail_score": 71.463,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 2,
+    "debris_pixels": 1,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 52,
+    "head_scale": 0.6211,
+    "magenta_verification": "audit/cat-artwork/live-magenta/cream-magenta.png",
+    "asset": "assets/cats/cream.webp",
+    "mode": "RGBA",
+    "source_detail_score": 93.503,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.541,
+    "magenta_verification": "audit/cat-artwork/live-magenta/dad-blue-magenta.png",
+    "asset": "assets/cats/dad-blue.webp",
+    "mode": "RGBA",
+    "source_detail_score": 50.028,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 3,
+    "cyan_rim_pixels": 347,
+    "head_scale": 0.6289,
+    "magenta_verification": "audit/cat-artwork/live-magenta/fawn-magenta.png",
+    "asset": "assets/cats/fawn.webp",
+    "mode": "RGBA",
+    "source_detail_score": 7792.872,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5449,
+    "magenta_verification": "audit/cat-artwork/live-magenta/golden-shaded-magenta.png",
+    "asset": "assets/cats/golden-shaded.webp",
+    "mode": "RGBA",
+    "source_detail_score": 36.307,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 162,
+    "head_scale": 0.4746,
+    "magenta_verification": "audit/cat-artwork/live-magenta/grace-dominica-blh-magenta.png",
+    "asset": "assets/cats/grace-dominica-blh.webp",
+    "mode": "RGBA",
+    "source_detail_score": 179.887,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      768,
+      768
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 182,
+    "head_scale": 0.625,
+    "magenta_verification": "audit/cat-artwork/live-magenta/lilac-cream-tortie-magenta.png",
+    "asset": "assets/cats/lilac-cream-tortie.webp",
+    "mode": "RGBA",
+    "source_detail_score": 1845.652,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5527,
+    "magenta_verification": "audit/cat-artwork/live-magenta/lilac-point-magenta.png",
+    "asset": "assets/cats/lilac-point.webp",
+    "mode": "RGBA",
+    "source_detail_score": 26.995,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 11,
+    "cyan_rim_pixels": 1045,
+    "head_scale": 0.6504,
+    "magenta_verification": "audit/cat-artwork/live-magenta/lilac-white-03-magenta.png",
+    "asset": "assets/cats/lilac-white-03.webp",
+    "mode": "RGBA",
+    "source_detail_score": 3623.897,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 3,
+    "debris_pixels": 2,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 17,
+    "head_scale": 0.6211,
+    "magenta_verification": "audit/cat-artwork/live-magenta/lilac-magenta.png",
+    "asset": "assets/cats/lilac.webp",
+    "mode": "RGBA",
+    "source_detail_score": 142.787,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5547,
+    "magenta_verification": "audit/cat-artwork/live-magenta/mum-blue-white-03-magenta.png",
+    "asset": "assets/cats/mum-blue-white-03.webp",
+    "mode": "RGBA",
+    "source_detail_score": 36.029,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      768,
+      768
+    ],
+    "has_alpha": true,
+    "components": 2,
+    "debris_pixels": 1,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 675,
+    "head_scale": 0.6315,
+    "magenta_verification": "audit/cat-artwork/live-magenta/red-white-03-magenta.png",
+    "asset": "assets/cats/red-white-03.webp",
+    "mode": "RGBA",
+    "source_detail_score": 1353.519,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5684,
+    "magenta_verification": "audit/cat-artwork/live-magenta/silver-shaded-magenta.png",
+    "asset": "assets/cats/silver-shaded.webp",
+    "mode": "RGBA",
+    "source_detail_score": 28.156,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      768,
+      768
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 309,
+    "head_scale": 0.612,
+    "magenta_verification": "audit/cat-artwork/live-magenta/tortie-magenta.png",
+    "asset": "assets/cats/tortie.webp",
+    "mode": "RGBA",
+    "source_detail_score": 1810.399,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      512,
+      512
+    ],
+    "has_alpha": true,
+    "components": 1,
+    "debris_pixels": 0,
+    "holes_pixels": 0,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.6387,
+    "magenta_verification": "audit/cat-artwork/live-magenta/white-magenta.png",
+    "asset": "assets/cats/white.webp",
+    "mode": "RGBA",
+    "source_detail_score": 18.919,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  },
+  {
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "has_alpha": true,
+    "components": 3,
+    "debris_pixels": 4,
+    "holes_pixels": 1,
+    "cyan_rim_pixels": 0,
+    "head_scale": 0.5811,
+    "magenta_verification": "audit/cat-artwork/live-magenta/yoshi-magenta.png",
+    "asset": "assets/cats/yoshi.webp",
+    "mode": "RGBA",
+    "source_detail_score": 967.046,
+    "background_rgb": null,
+    "background_stddev": null,
+    "note": "Key-background measurements require the original flat-background source."
+  }
+]
