@@ -26,6 +26,9 @@ body{margin:0;color:var(--text);font-family:'Archivo',system-ui,sans-serif;font-
  background-image:radial-gradient(120% 70% at 50% -10%,rgba(217,184,96,.09),transparent 60%),
                   radial-gradient(90% 50% at 50% 100%,rgba(201,188,234,.05),transparent 70%);
  background-attachment:fixed}
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.22;
+ background-image:radial-gradient(rgba(255,255,255,.18) .45px,transparent .7px);
+ background-size:5px 5px;mask-image:linear-gradient(to bottom,black,transparent 70%)}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
 .wrap{max-width:1140px;margin:0 auto;padding:0 20px 110px}
@@ -91,7 +94,11 @@ h1 span{color:var(--gold);display:block}
  color:var(--faint)}
 .gen-note{margin:6px 0 26px;color:var(--dim);font-size:14px;max-width:56ch}
 .pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:18px}
-.pair{background:none;border:1px solid var(--edge);border-radius:20px;padding:14px}
+.pair{background:linear-gradient(145deg,rgba(255,255,255,.018),transparent 44%),var(--ink-2);
+ border:1px solid var(--edge);border-radius:20px;padding:14px;box-shadow:0 18px 38px -30px rgba(0,0,0,.95);
+ transition:border-color .28s ease,transform .28s cubic-bezier(.2,.8,.3,1),box-shadow .28s ease}
+.pair:has(.card:hover){border-color:rgba(217,184,96,.38);transform:translateY(-2px);
+ box-shadow:0 25px 48px -32px rgba(0,0,0,1)}
 .pair-label{margin:0 0 11px;font-size:10px;color:var(--faint);font-family:'IBM Plex Mono',monospace;
  letter-spacing:.18em;text-transform:uppercase}
 .pair-label b{color:var(--dim);font-family:'IBM Plex Mono',monospace;font-weight:400;letter-spacing:.1em}
@@ -100,22 +107,35 @@ h1 span{color:var(--gold);display:block}
 /* ---------- the cat card: portrait first ---------- */
 .card{width:100%;background:var(--ink-3);border:1px solid var(--edge);border-radius:18px;padding:14px;
  display:flex;flex-direction:column;gap:12px;align-items:stretch;cursor:pointer;text-align:left;color:var(--text);
- box-shadow:var(--raise);
+ box-shadow:var(--raise);position:relative;overflow:hidden;
  transition:opacity .3s ease,transform .28s cubic-bezier(.2,.8,.3,1),border-color .28s ease,box-shadow .28s ease}
+.card::before{content:'';position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+ opacity:0;transition:opacity .28s ease}
 .card:hover{transform:translateY(-4px);border-color:var(--gold);
  box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 26px 44px -22px rgba(0,0,0,1),0 0 40px -14px rgba(217,184,96,.45)}
+.card:hover::before{opacity:1}
 .card.pop{animation:pop .55s cubic-bezier(.2,.8,.3,1)}
 @keyframes pop{0%{transform:translateY(0) scale(1)}45%{transform:translateY(-6px) scale(1.03)}100%{transform:none}}
 /* the portrait frame: the assets are square busts on transparency, so contain
    them and stand them on the floor of the frame under a warm pool of light */
 .cface{position:relative;width:100%;aspect-ratio:1.3;border-radius:12px;overflow:hidden;flex:none;
- background:var(--ink-2);isolation:isolate}
+ background:var(--ink-2);isolation:isolate;box-shadow:inset 0 0 0 1px rgba(255,255,255,.035)}
 .cface::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--lit)}
+.cface::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(to bottom,rgba(255,255,255,.045),transparent 28%,rgba(0,0,0,.2)),
+             linear-gradient(90deg,rgba(255,255,255,.025),transparent 18% 82%,rgba(0,0,0,.16));
+ box-shadow:inset 0 0 0 1px rgba(255,255,255,.035);transition:opacity .3s ease}
 .cface svg,.cface img{position:absolute;inset:0;width:100%;height:100%;display:block;
  object-fit:contain;object-position:center bottom;
  transition:transform .5s cubic-bezier(.2,.8,.3,1)}
 .cface svg{padding:6% 0 2%}
+.card-stamp{position:absolute;z-index:4;top:9px;right:9px;border:1px solid rgba(255,255,255,.14);border-radius:99px;
+ background:rgba(20,17,27,.56);backdrop-filter:blur(8px);padding:4px 8px;font-family:'IBM Plex Mono',monospace;
+ font-size:8px;letter-spacing:.16em;color:var(--text);text-transform:uppercase;box-shadow:0 5px 14px -8px #000}
 .card:hover .cface img{transform:scale(1.05)}
+.card:hover .cface::after{opacity:.55}
+.card:focus-visible{transform:translateY(-3px);border-color:var(--gold);
+ box-shadow:0 0 0 1px var(--gold),0 26px 44px -22px rgba(0,0,0,1)}
 .card>div{min-width:0;flex:1 1 auto;display:flex;flex-direction:column}
 .card .name,.card .desc,.card .rel{overflow-wrap:break-word}
 .card .rel{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.2em;
@@ -126,7 +146,8 @@ h1 span{color:var(--gold);display:block}
  letter-spacing:.18em;margin-bottom:3px}
 .card .desc{font-size:12.5px;color:var(--dim);line-height:1.4;margin-top:6px}
 .card .code{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:var(--faint);
- margin-top:auto;padding-top:10px;border-top:1px solid var(--edge)}
+ margin-top:auto;padding-top:10px;border-top:1px solid var(--edge);transition:color .25s ease}
+.card:hover .code{color:var(--lilac)}
 .card .desc{margin-bottom:10px}
 .card.dim{opacity:.2}
 .card.hit{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 46px -12px rgba(217,184,96,.6)}
@@ -282,6 +303,15 @@ body.locked .gate{display:flex}
 .found li b{color:var(--text)}
 .src{margin:11px 0 0;font-size:11.5px;color:var(--faint);line-height:1.5}
 .src a{color:var(--gold)}
+.research{margin-top:18px;padding:15px;border:1px solid rgba(217,184,96,.42);border-radius:16px;
+ background:linear-gradient(135deg,rgba(217,184,96,.13),rgba(183,166,188,.08));position:relative;overflow:hidden}
+.research::after{content:'↗';position:absolute;right:14px;top:9px;color:rgba(217,184,96,.24);font:900 42px/1 Fraunces,Georgia,serif}
+.research-kicker{margin:0 0 5px;font:400 8.5px/1.4 'IBM Plex Mono',monospace;letter-spacing:.21em;text-transform:uppercase;color:var(--gold)}
+.research h4{margin:0 0 9px;font:700 16px/1.1 Fraunces,Georgia,serif;letter-spacing:-.02em}
+.research .found{position:relative;z-index:1}.research .src{margin-top:10px}
+.source-link{position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:8px 12px;
+ border:1px solid var(--gold);border-radius:99px;background:rgba(20,17,27,.6);color:var(--gold);font-size:11px;font-weight:700;
+ text-decoration:none;transition:background .2s,transform .2s}.source-link:hover{background:var(--gold);color:#171208;transform:translateY(-1px)}
 
 /* ---------- the cat as a gallery plate ---------- */
 #cat{position:fixed;right:18px;bottom:18px;z-index:80;width:min(390px,calc(100vw - 36px));
@@ -337,7 +367,10 @@ img.bigcat{object-fit:contain;object-position:center bottom}
  animation:sheen 6s ease-in-out infinite}
 @keyframes sheen{0%,72%{transform:translateX(-70%)}100%{transform:translateX(70%)}}
 
-#catflip{margin:12px auto 0;display:block;background:var(--ink-3);color:var(--text);border-color:var(--edge-2)}
+#cat-actions{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:12px auto 0}
+#catflip{display:block;background:var(--ink-3);color:var(--text);border-color:var(--edge-2)}
+#catsource{display:inline-flex;align-items:center;text-decoration:none;background:var(--gold-wash);border-color:var(--gold-deep);color:var(--gold)}
+#catsource[hidden]{display:none}
 #cattitle{margin:0 0 12px;font-size:11px;color:var(--gold);font-weight:400;line-height:1.5;
  font-family:'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
 #cattitle:empty{display:none}
@@ -422,6 +455,10 @@ img.bigcat{object-fit:contain;object-position:center bottom}
   .pairs{grid-template-columns:1fr}
   .bigcat,.bigcat.fur-slot{width:190px;height:190px}
   .wrap{padding:0 15px 90px}
+  .pair{padding:10px;border-radius:17px}
+  .card{padding:12px;border-radius:15px}
+  .cface{border-radius:10px}
+  .nav{margin-left:-15px;margin-right:-15px;padding-left:15px;padding-right:15px}
   h1{font-size:clamp(2.1rem,10vw,2.8rem)}
   .gen{padding-left:20px;margin-left:4px}
   .gen-head::before{left:-25px}
@@ -597,7 +634,8 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
       </div></div>
     </div>
   </div>
-  <button class="pill" id="catflip" aria-pressed="false">Turn it over ↻</button>
+  <div id="cat-actions"><button class="pill" id="catflip" aria-pressed="false">Turn it over ↻</button>
+  <a class="pill" id="catsource" target="_blank" rel="noopener" hidden></a></div>
 </aside>
 
 <div id="bubble" role="status" aria-live="polite"></div>
@@ -818,7 +856,8 @@ function card(entry,gen){
   const rel = gen===0 ? "The boy himself" : REL[gen-1][pos] + (gen>1?` · ${side} side`:"");
   const b=document.createElement("button");
   b.type="button";b.className="card"+(gen?"":" root");b.dataset.cols=node.cols.join(" ");
-  b.innerHTML=`<span class="cface">${face(node)}</span>`+`<div><span class="rel">${rel}${node.found?' · researched':''}</span>
+  const stamp=gen===0?"home":`gen ${gen}`;
+  b.innerHTML=`<span class="cface"><span class="card-stamp">${stamp}</span>${face(node)}</span>`+`<div><span class="rel">${rel}${node.found?' · researched':''}</span>
     <span class="name">${node.title?`<span class="title">${node.title}</span>`:""}${node.name}</span>
     <div class="desc">${says(node)}</div>
     <div class="code">${node.code}</div></div>`;
@@ -907,16 +946,76 @@ function codeRows(code){
 /* Found online rather than on the certificate, so it is kept separate and
    always shows where it came from. Add a cat by name to extend this. */
 const FOUND={
+ "Ronaldo Olivia Charm":{
+   src:"GCCF Lakeland & District Cat Club show report (2023)",
+   url:"https://www.gccfcats.org/wp-content/uploads/2023/07/CulfE_Lakeland_DistrictCC2023.pdf",
+   facts:["Born <b>4 February 2022</b>.",
+    "Shown as Medley’s Ronaldo Olivia Charm: cream-and-white harlequin, orange-eyed (BSH e 02 62) — a direct match for the pedigree entry.",
+    "The judge described a broad rounded head, short thick neck, cobby body and short strong legs — a lovely little bit of the real cat behind the codes."]},
  "Bonaparte vom Kupferstich":{
-   src:"kotoffski.ru, the Russian cattery that stood him at stud",
-   url:"http://kotoffski.ru/?p=4014",
+   src:"Kotoffski pedigree record, corroborated by FDkat and a German cattery page",
+   url:"https://cattery-vom-wolfswald.jimdoweb.com/youngster/",
+   photo:true,
    facts:["Grand International Champion — his GR.I.CH confirmed.",
     "Fawn <b>ticked</b>, which the certificate doesn't record — it only says fawn.",
     "Born 1 September 2010. Imported from Germany, bred by Christiane Traut at the vom Kupferstich cattery.",
     "His own pedigree survives online and carries this family three generations further back than Yoshi's certificate does.",
     "His sire was <b>Eur.Ch Timo vom kleinen Schlösschen</b> (BRI b, chocolate).",
     "His dam was <b>Ch Rosa vom Kupferstich</b> (BRI a, blue).",
-    "Tested clear of FeLV, FIV and PKD; heart scans clear in 2011 and 2013; blood group B."]},
+    "Tested clear of FeLV, FIV and PKD; heart scans clear in 2011 and 2013; blood group B.",
+    "The linked cattery page includes an actual public photo of Bonaparte. Linked, not copied, so the photographer keeps control of it."]},
+ "Nedercats Bigger Bang Cimon":{
+   src:"Felidae e.V. German pedigree database",
+   url:"https://www.felidae-ev.de/stammdaten-sb-41695-Crystal%2BFlame%27s%2BKiss%2B%26%2BKill-Britisch%2BKurzhaar",
+   facts:["Born <b>1 May 2007</b>.",
+    "Cinnamon British Shorthair and European Grand Champion — the cinnamon source in this branch.",
+    "The public pedigree entry also carries a real-photo marker; follow the source rather than treating the site illustration as a historical photograph."]},
+ "Uccelini von Flöthbach":{
+   src:"Felidae e.V. German pedigree database",
+   url:"https://www.felidae-ev.de/stammdaten-sb-41695-Crystal%2BFlame%27s%2BKiss%2B%26%2BKill-Britisch%2BKurzhaar",
+   facts:["Born <b>6 October 2004</b>.",
+    "Red British Shorthair and International Champion; he is Cimon’s sire, extending the documented branch another generation."]},
+ "Sun-Beam's Jeanet":{
+   src:"Felidae e.V. German pedigree database",
+   url:"https://www.felidae-ev.de/stammdaten-sb-41695-Crystal%2BFlame%27s%2BKiss%2B%26%2BKill-Britisch%2BKurzhaar",
+   facts:["Cinnamon-and-white British Shorthair (BSH o 03), confirmed as Cimon’s dam.",
+    "The source has a real-photo marker and records her registered number, so it is a better historical lead than a generated portrait."]},
+ "Vitus von der bunten Stadt":{
+   src:"German cattery pedigree pages and TICA show catalogue",
+   url:"https://www.vom-elbhochufer.de/?page_id=1907",
+   facts:["Blue British Shorthair and World Champion, confirmed as Fatima vom Perlenstrand’s sire.",
+    "The source traces a later descendant through him; it is an independently published continuation of this branch."]},
+ "Galahad v. Het Hof v. Logres":{
+   src:"2006 World Show catalogue",
+   url:"https://jyrak.dk/pdf/WS-2006.pdf",
+   facts:["Born <b>23 May 2004</b>.",
+    "Lilac British Shorthair and Champion at the time of the catalogue; later records carry his European Grand Champion title.",
+    "His parents are <b>Obelix vom Elfenfohren</b> and <b>Ceinwyn van het Hof van Logres</b>, precisely matching the recorded branch to Rosa and then Bonaparte."]},
+ "Aysha Symbol of Zhanna":{
+   src:"Norwegian pedigree registry mirror",
+   url:"https://katt.nrr.no/katter/perusnaytto_kissa.aspx?id=227256",
+   facts:["Born <b>4 June 2018</b>.",
+    "Lilac tortie-and-white (BSH j 03), with the Italian and Russian registration numbers published alongside the exact colour code."]},
+ "Ablikats Iceberg":{
+   src:"French 2024 show catalogue and Norwegian pedigree registry mirror",
+   url:"https://v-assets.cdnsw.com/fs/CATALOGUES/g0y93-CATALOGUE-MARSEILLE-2024.pdf",
+   facts:["Champion, blue British Shorthair (BSH a), with his registration recorded in a current pedigree database.",
+    "The French catalogue records his daughter <b>Lavender Storm Olivia Charm</b>, born 9 March 2021, with <b>Charmante Isabella</b> as dam — an independently documented full sibling of Hennessy’s parentage."]},
+ "Charmante Isabella":{
+   src:"French 2024 show catalogue",
+   url:"https://v-assets.cdnsw.com/fs/CATALOGUES/g0y93-CATALOGUE-MARSEILLE-2024.pdf",
+   facts:["Recorded as the dam of Lavender Storm Olivia Charm, born 9 March 2021, with Ablikats Iceberg as sire.",
+    "That independently confirms the same parent pair printed for Hennessy, so Lavender Storm is a documented full sibling in this close branch."]},
+ "Kevin Briraspbery":{
+   src:"TopCat WCF show catalogue",
+   url:"https://en.top-cat.org/cat-shows/3103/catalog",
+   facts:["Recorded as the red-and-white (BRI d 03) sire of <b>Charmante Harmonee</b>, born 11 January 2018.",
+    "The same catalogue gives Ballou Cat Charmante as the dam, independently backing this immediate maternal branch."]},
+ "Ballou Cat Charmante":{
+   src:"TopCat WCF show catalogue",
+   url:"https://en.top-cat.org/cat-shows/3103/catalog",
+   facts:["Recorded as the chocolate-and-white (BRI b 03) dam of Charmante Harmonee, born 11 January 2018.",
+    "That documented daughter gives Hennessy’s maternal line a real-world sibling record without inventing a new ancestor."]},
  "Kastanjeback's Fraskudde":{
    src:"a British Shorthair breeder's own pedigree notes",
    url:"https://www.muffinandpoppy.co.uk/british-shorthair/poppy/",
@@ -996,13 +1095,17 @@ function showCat(node,rel,gen){
   const bits=[];
   if(node.health)bits.push(`Screened <b>${node.health}</b> — polycystic kidney disease and the heart condition British Shorthairs are watched for.`);
   if(node.found)bits.push(`Not on Yoshi's certificate. This comes off <b>Bonaparte vom Kupferstich's</b> own German pedigree, published by the Russian cattery that stood him at stud.`);
-  const f=FOUND[node.name]||(bits.length?{facts:bits,src:"Bonaparte's pedigree, via kotoffski.ru",
-    url:"http://kotoffski.ru/wp-content/uploads/Pedigree-Bonaparte.jpg"}:null);
+  const f=FOUND[node.name]||(bits.length?{facts:bits,src:"Bonaparte’s public pedigree record (FDkat)",
+    url:"https://fdkat.dk/perusnaytto_kissa.aspx?id=85268"}:null);
+  const source=document.getElementById("catsource");
+  source.hidden=!f;
+  if(f){source.href=f.url;source.textContent=f.photo?"Original photo ↗":"Original record ↗";}
   document.getElementById("catfound").innerHTML=f
-    ? `<p class="log-h" style="margin:15px 0 6px">Turned up online</p>
+    ? `<section class="research"><p class="research-kicker">Found beyond the certificate</p>
+       <h4>Real-world record</h4>
        <ul class="found">${f.facts.map(x=>`<li>${x}</li>`).join("")}</ul>
-       <p class="src">From ${f.src} — <a href="${f.url}" target="_blank" rel="noopener">see it</a>.
-        Not on Yoshi's certificate, so treat it as a lead rather than gospel.</p>` : "";
+       <p class="src">Source: ${f.src}. It is an external research lead, not part of Yoshi’s certificate.</p>
+       <a class="source-link" href="${f.url}" target="_blank" rel="noopener">${f.photo?"View original photo ↗":"Open the original record ↗"}</a></section>` : "";
 
   catEl.classList.add("show");
   bubble.classList.remove("show");

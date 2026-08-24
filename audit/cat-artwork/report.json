@@ -1,0 +1,376 @@
+[
+  {
+    "source": "assets/cats/sources/blue-cream-tortie-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      2.24,
+      201.96,
+      253.52
+    ],
+    "background_stddev": 0.704,
+    "fur_background_separation_p05": 200.018,
+    "source_detail_score": 986.006,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 0,
+      "cyan_rim_pixels": 331,
+      "head_scale": 0.6484,
+      "magenta_verification": "audit/cat-artwork/blue-cream-tortie-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/blue-cream-white-03-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      2.44,
+      200.56,
+      247.53
+    ],
+    "background_stddev": 0.691,
+    "fur_background_separation_p05": 191.495,
+    "source_detail_score": 687.181,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 0,
+      "cyan_rim_pixels": 500,
+      "head_scale": 0.6016,
+      "magenta_verification": "audit/cat-artwork/blue-cream-white-03-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/brown-tabby-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      8.74,
+      222.21,
+      252.77
+    ],
+    "background_stddev": 0.793,
+    "fur_background_separation_p05": 237.567,
+    "source_detail_score": 3856.703,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        768,
+        768
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 1,
+      "cyan_rim_pixels": 333,
+      "head_scale": 0.6328,
+      "magenta_verification": "audit/cat-artwork/brown-tabby-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/chocolate-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      1.28,
+      194.78,
+      253.44
+    ],
+    "background_stddev": 0.677,
+    "fur_background_separation_p05": 253.754,
+    "source_detail_score": 1594.62,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        768,
+        768
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 0,
+      "cyan_rim_pixels": 27,
+      "head_scale": 0.6406,
+      "magenta_verification": "audit/cat-artwork/chocolate-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/chocolate-white-03-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      0.8,
+      188.45,
+      253.34
+    ],
+    "background_stddev": 0.673,
+    "fur_background_separation_p05": 219.985,
+    "source_detail_score": 1145.438,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        768,
+        768
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 0,
+      "cyan_rim_pixels": 636,
+      "head_scale": 0.6081,
+      "magenta_verification": "audit/cat-artwork/chocolate-white-03-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/cinnamon-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      1.14,
+      176.4,
+      242.83
+    ],
+    "background_stddev": 0.674,
+    "fur_background_separation_p05": 226.285,
+    "source_detail_score": 1228.19,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 0,
+      "cyan_rim_pixels": 535,
+      "head_scale": 0.6094,
+      "magenta_verification": "audit/cat-artwork/cinnamon-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/fawn-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      1.75,
+      182.49,
+      237.01
+    ],
+    "background_stddev": 0.687,
+    "fur_background_separation_p05": 226.549,
+    "source_detail_score": 1010.352,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 3,
+      "cyan_rim_pixels": 876,
+      "head_scale": 0.6289,
+      "magenta_verification": "audit/cat-artwork/fawn-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/lilac-cream-tortie-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      4.49,
+      177.66,
+      247.68
+    ],
+    "background_stddev": 0.679,
+    "fur_background_separation_p05": 203.05,
+    "source_detail_score": 1430.953,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        768,
+        768
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 0,
+      "cyan_rim_pixels": 311,
+      "head_scale": 0.625,
+      "magenta_verification": "audit/cat-artwork/lilac-cream-tortie-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/lilac-white-03-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      3.78,
+      203.88,
+      248.86
+    ],
+    "background_stddev": 0.73,
+    "fur_background_separation_p05": 205.991,
+    "source_detail_score": 557.427,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        512,
+        512
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 11,
+      "cyan_rim_pixels": 1135,
+      "head_scale": 0.6504,
+      "magenta_verification": "audit/cat-artwork/lilac-white-03-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/red-white-03-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      2.15,
+      205.89,
+      247.47
+    ],
+    "background_stddev": 0.717,
+    "fur_background_separation_p05": 227.053,
+    "source_detail_score": 1221.772,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        768,
+        768
+      ],
+      "has_alpha": true,
+      "components": 2,
+      "debris_pixels": 1,
+      "holes_pixels": 0,
+      "cyan_rim_pixels": 707,
+      "head_scale": 0.6315,
+      "magenta_verification": "audit/cat-artwork/red-white-03-magenta.png"
+    }
+  },
+  {
+    "source": "assets/cats/sources/tortie-source.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mode": "RGB",
+    "has_alpha": false,
+    "background_rgb": [
+      1.08,
+      192.7,
+      247.75
+    ],
+    "background_stddev": 0.681,
+    "fur_background_separation_p05": 231.505,
+    "source_detail_score": 1443.774,
+    "opaque_alpha_range": [
+      255,
+      255
+    ],
+    "output": {
+      "dimensions": [
+        768,
+        768
+      ],
+      "has_alpha": true,
+      "components": 1,
+      "debris_pixels": 0,
+      "holes_pixels": 0,
+      "cyan_rim_pixels": 338,
+      "head_scale": 0.612,
+      "magenta_verification": "audit/cat-artwork/tortie-magenta.png"
+    }
+  }
+]

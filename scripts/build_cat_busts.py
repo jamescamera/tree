@@ -1,5 +1,7 @@
 """Turn flat-cyan cat renders into the site's bust portraits."""
 from PIL import Image, ImageFilter
+import argparse, json
+from pathlib import Path
 import numpy as np, os, glob
 from scipy import ndimage
 
@@ -22,14 +24,19 @@ LO, HI = 60.0, 140.0                               # fur sits >=150 away; backdr
 HEAD = 0.67
 HEAD_OVERRIDE = {'grace-dominica-blh': 0.55}      # a longhair needs her ruff to read
 
-def build(arr, name, key_it):
+def build(arr, name, key_it, strip_dark_outline=False):
     if key_it:
         d = np.linalg.norm(arr[:, :, :3] - measure_key(arr), axis=2)
         arr[:, :, 3] *= np.clip((d - LO) / (HI - LO), 0, 1)
 
     rgb = arr[:, :, :3]; mx = rgb.max(2); mn = rgb.min(2)
-    inky = (mx < 95) & ((mx - mn) < 26)             # some sources stroke a black outline
-    arr[:, :, 3][inky & ndimage.binary_dilation(arr[:, :, 3] < 20, np.ones((11, 11)))] = 0
+    # Some old sources had a drawn near-black outline.  Do not apply this repair
+    # by default: it can amputate a real black/black-smoke/tortie silhouette.
+    # It is deliberately an explicit recovery option for a visually verified
+    # source, never a global "cleanup" rule.
+    if strip_dark_outline:
+        inky = (mx < 95) & ((mx - mn) < 26)
+        arr[:, :, 3][inky & ndimage.binary_dilation(arr[:, :, 3] < 20, np.ones((11, 11)))] = 0
 
     # Keep the cat, drop every scrap. Plain component labelling is not enough:
     # some sources carry a full-width strip along the top that touches the ears,
@@ -67,7 +74,11 @@ def build(arr, name, key_it):
         arr[:, :, :3][fix] = arr[:, :, :3][idx[0][fix], idx[1][fix]]
 
     R, G, B, A = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2], arr[:, :, 3]
-    cap = R + 8; f = (A > 20) & (((G + B) / 2) > cap)   # despill: cyan lifts G and B
+    # Restrict despill to the silhouette rim.  A blue British Shorthair is
+    # genuinely cooler than red in its interior; a whole-body G/B cap would
+    # silently turn a correct blue coat into neutral grey.
+    edge = vis & ~ndimage.binary_erosion(vis, np.ones((5, 5)))
+    cap = R + 8; f = edge & (((G + B) / 2) > cap)
     G[f] = np.minimum(G[f], cap[f]); B[f] = np.minimum(B[f], cap[f])
     im = Image.fromarray(arr.round().clip(0, 255).astype(np.uint8), 'RGBA')
 
@@ -121,7 +132,119 @@ def build(arr, name, key_it):
     rgb = Image.merge('RGB', ch[:3]).filter(ImageFilter.UnsharpMask(radius=1.1, percent=115, threshold=2))
     return Image.merge('RGBA', (*rgb.split(), ch[3]))
 
+def source_report(path):
+    """Numbers that establish whether a flat-background source is usable.
+
+    Detail is measured only well inside the detected cat, so cyan fringe cannot
+    inflate it.  The report deliberately records source dimensions rather than
+    accepting a resolution encoded in a filename.
+    """
+    im = Image.open(path)
+    arr = np.asarray(im.convert('RGBA')).astype(np.float32)
+    rgb, alpha = arr[:, :, :3], arr[:, :, 3]
+    h, w = rgb.shape[:2]; c = max(8, min(h, w) // 20)
+    corners = np.concatenate([rgb[:c,:c].reshape(-1,3), rgb[:c,-c:].reshape(-1,3),
+                              rgb[-c:,:c].reshape(-1,3), rgb[-c:,-c:].reshape(-1,3)])
+    key = measure_key(arr)
+    dist = np.linalg.norm(rgb - key, axis=2)
+    sure = dist > 140
+    # A conservative interior mask prevents boundary/background transitions
+    # (or an un-despilled cyan rim) from gaming the sharpness figure.
+    interior = ndimage.binary_erosion(sure, np.ones((11, 11)))
+    grey = rgb.mean(2)
+    if interior.any():
+        lap = ndimage.laplace(grey)
+        detail = float(np.var(lap[interior]))
+        separation = float(np.percentile(dist[interior], 5))
+    else:
+        detail = separation = 0.0
+    return {
+        'source': str(path), 'dimensions': [w, h], 'mode': im.mode,
+        'has_alpha': im.mode in ('RGBA', 'LA') or 'transparency' in im.info,
+        'background_rgb': [round(float(x), 2) for x in key],
+        'background_stddev': round(float(corners.std(axis=0).mean()), 3),
+        'fur_background_separation_p05': round(separation, 3),
+        'source_detail_score': round(detail, 3),
+        'opaque_alpha_range': [int(alpha.min()), int(alpha.max())],
+    }
+
+def output_report(im, magenta_path):
+    arr = np.asarray(im.convert('RGBA')).astype(np.float32)
+    rgb, a = arr[:, :, :3], arr[:, :, 3]
+    solid = a > 20
+    labels, count = ndimage.label(solid)
+    areas = [int((labels == i).sum()) for i in range(1, count + 1)]
+    largest = max(areas, default=0)
+    debris = sum(x for x in areas if x != largest)
+    holes = int((ndimage.binary_fill_holes(solid) & ~solid).sum())
+    eroded = ndimage.binary_erosion(solid, np.ones((7, 7)))
+    rim = solid & ~eroded
+    # Cyan spill is evaluated on the visible rim after despill, not globally.
+    cyan = rim & (rgb[:, :, 1] + rgb[:, :, 2] > 2 * rgb[:, :, 0] + 32)
+    head_band = solid[:max(1, im.height // 4)]
+    xs = np.where(head_band.max(0))[0]
+    head_scale = float((xs.max() - xs.min() + 1) / im.width) if len(xs) else 0.0
+    bg = np.zeros_like(rgb) + np.array([255, 0, 255], np.float32)
+    composite = rgb * (a[:, :, None] / 255) + bg * (1 - a[:, :, None] / 255)
+    Image.fromarray(composite.round().astype(np.uint8), 'RGB').save(magenta_path)
+    return {'dimensions': [im.width, im.height], 'has_alpha': True,
+            'components': count, 'debris_pixels': debris, 'holes_pixels': holes,
+            'cyan_rim_pixels': int(cyan.sum()), 'head_scale': round(head_scale, 4),
+            'magenta_verification': str(magenta_path)}
+
+def asset_report(path, magenta_path):
+    """Audit a shipped WebP without pretending it still has a keyable backdrop."""
+    im = Image.open(path).convert('RGBA')
+    report = output_report(im, magenta_path)
+    arr = np.asarray(im).astype(np.float32)
+    interior = ndimage.binary_erosion(arr[:, :, 3] > 20, np.ones((11, 11)))
+    lap = ndimage.laplace(arr[:, :, :3].mean(2))
+    report.update({'asset': str(path), 'mode': Image.open(path).mode,
+                   'source_detail_score': round(float(np.var(lap[interior])), 3) if interior.any() else 0,
+                   'background_rgb': None, 'background_stddev': None,
+                   'note': 'Key-background measurements require the original flat-background source.'})
+    return report
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--sources', type=Path, help='flat-cyan PNG source directory')
+    parser.add_argument('--output', type=Path, help='destination for processed WebPs')
+    parser.add_argument('--qa-dir', type=Path, help='destination for magenta verification PNGs')
+    parser.add_argument('--report', type=Path, help='write deterministic JSON QA report')
+    parser.add_argument('--audit-assets', type=Path,
+                        help='audit every shipped WebP in this directory (requires --qa-dir and --report)')
+    parser.add_argument('--strip-dark-outline', action='store_true',
+                        help='only for a source visually proven to have an artificial dark outline')
+    args = parser.parse_args()
+    if args.sources:
+        if not args.output or not args.qa_dir or not args.report:
+            parser.error('--sources requires --output, --qa-dir and --report')
+        args.output.mkdir(parents=True, exist_ok=True)
+        args.qa_dir.mkdir(parents=True, exist_ok=True)
+        report = []
+        for source in sorted(args.sources.glob('*-source.png')):
+            name = source.name.removesuffix('-source.png')
+            entry = source_report(source)
+            out = build(np.asarray(Image.open(source).convert('RGBA')).astype(np.float32), name, True,
+                        strip_dark_outline=args.strip_dark_outline)
+            output = args.output / f'{name}.webp'
+            out.save(output, 'WEBP', quality=88, method=6)
+            entry['output'] = output_report(out, args.qa_dir / f'{name}-magenta.png')
+            report.append(entry)
+        args.report.write_text(json.dumps(report, indent=2) + '\n')
+        print(f'processed {len(report)} sources; report: {args.report}')
+        raise SystemExit(0)
+
+    if args.audit_assets:
+        if not args.qa_dir or not args.report:
+            parser.error('--audit-assets requires --qa-dir and --report')
+        args.qa_dir.mkdir(parents=True, exist_ok=True)
+        report = [asset_report(path, args.qa_dir / f'{path.stem}-magenta.png')
+                  for path in sorted(args.audit_assets.glob('*.webp'))]
+        args.report.write_text(json.dumps(report, indent=2) + '\n')
+        print(f'audited {len(report)} shipped assets; report: {args.report}')
+        raise SystemExit(0)
+
     REF = {'lilac': 'audit/reference/lilac_final.png', 'cream': 'audit/reference/cream_final.png',
            'cream-white-03': 'audit/reference/cream-white-03_final.png',
            'grace-dominica-blh': 'audit/reference/grace_final.png'}

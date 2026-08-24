@@ -35,24 +35,29 @@ baked in, the pixels under the holes are gone and no repair is possible.
 1. **Despill.** Cyan lifts green and blue above red at the silhouette. Cap both at
    red. Verified against every asset: this touches *zero* interior pixels, so it
    only ever neutralises the fringe and can be applied globally.
-2. **Bust crop** to the top 60% of the cat's bounding box — 80% for Grace, below.
+2. **Bust crop** from a head-width-derived frame, preserving enough chest to
+   avoid an unnatural straight lower edge (Grace retains extra ruff).
 3. **Fade** alpha to zero, smoothstepped, over the bottom 18%, so the crop line
    dissolves instead of showing as a straight cut.
 4. **Square on the head**, not on the widest part of the body: side = crop height
    × 1.16, centred on the head's horizontal midpoint. Squaring on the body leaves
    a full-body source small in a lot of empty canvas.
-5. 512×512 WebP, quality 88. `yoshi.webp` is 1024 from a 1224px source and is
-   *not* replaced by a 512 one — the hero renders at 260 CSS px and the difference
-   is obvious.
+5. Export 768×768 only when the measured source crop has at least 700 real
+   pixels; otherwise export 512×512 rather than presenting an upscale as detail.
+   `yoshi.webp` is 1024 from a 1224px source and is *not* replaced by a generated
+   asset.
 
 Both slots that use these — `.portrait` and `.bigcat` — are square, so the CSS is
 `object-fit: contain; object-position: center`.
 
-## Substitutions, all deliberate
+## Historical substitutions
 
-- **Red → cream**, no red artwork exists.
-- **Cinnamon tortie → cinnamon**, likewise. This is why Hennessy Olivia Charm
-  shows as a solid cinnamon despite being `BSH q 03`.
+- **Red → cream** was a temporary fallback and is no longer used:
+  `red-white-03.webp` now routes the actual pedigree phenotype.
+- **Cinnamon tortie → cinnamon** remains an explicit fallback. Two generated
+  candidates were rejected: one drifted grey and the other lost its tortie
+  patches. Do not install a substitute until a real cinnamon-and-cream tortie
+  source exists.
 - **Tabbies that are neither blue nor chocolate → brown tabby**, no generic
   tabby artwork.
 **Grace Dominica is no longer a substitution.** Her artwork is fawn and white,
@@ -63,9 +68,10 @@ shorthaired.
 ## The pipeline
 
 `scripts/build_cat_busts.py` is the whole thing, run against the flat-cyan
-sources (which live outside this repo). In order: chroma key, strip any stroked
-outline, open-and-keep-the-largest-blob, harden the interior, fill small holes,
-recover edge colour, despill, crop, fade, frame, export.
+sources in `assets/cats/sources/`. In order: chroma key, open-and-keep-the-largest
+blob, harden the interior, fill small holes, recover edge colour, despill, crop,
+fade, frame, export. Dark-outline removal is an explicit, visually verified option,
+not a global cleanup rule.
 
 Four of those steps exist because of specific failures, all found by measuring
 rather than by looking:
@@ -100,6 +106,33 @@ cost nothing when there is nothing to fix:
   the silhouette — revisit this if one ever is.
 
 ## Auditing
+
+Run the deterministic processor and then audit every installed WebP:
+
+```sh
+python scripts/build_cat_busts.py \
+  --sources assets/cats/sources --output assets/cats \
+  --qa-dir audit/cat-artwork --report audit/cat-artwork/report.json
+
+python scripts/build_cat_busts.py \
+  --audit-assets assets/cats --qa-dir audit/cat-artwork/live-magenta \
+  --report audit/cat-artwork/live-assets.json
+```
+
+The source files use the exact name `<phenotype>-source.png`; they are input
+material, not browser assets. The eleven replacement sources currently measure
+**1254×1254 RGB**, rather than the nominal 2048×2048 requested in the brief. The
+JSON report is authoritative: it records actual dimensions, alpha, background
+colour sampled from four corners, background flatness, fur/background separation,
+an interior-only detail score, silhouette components/holes, cyan-rim count, head
+scale, and a magenta verification render. The installed-WebP audit repeats the
+alpha/silhouette/detail/magenta checks for all live assets. Its background fields
+are null by design—alpha WebPs no longer contain the original backdrop.
+
+The detail score erodes the detected silhouette by 11 pixels before measuring;
+cyan fringe cannot inflate it. Never sharpen alpha. The optional
+`--strip-dark-outline` recovery must be checked manually on black/black-smoke
+silhouettes before use.
 
 Check the mattes by measurement, not by eye and not by HTTP status. Four numbers
 catch everything that has gone wrong so far, per asset:
