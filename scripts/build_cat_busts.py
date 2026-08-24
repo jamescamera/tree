@@ -67,17 +67,26 @@ def build(arr, name, key_it, strip_dark_outline=False):
     vis = arr[:, :, 3] > 20; lum = rgb.mean(2)
     ref = ndimage.grey_erosion(np.where(ndimage.binary_erosion(vis, np.ones((9, 9))), lum, 255), size=17)
     band = vis & ~ndimage.binary_erosion(vis, np.ones((7, 7)))
-    trust = (arr[:, :, 3] >= 250) & ~(band & (lum > ref + 22))
+    # Distrust the rim on colour as well as on brightness. On a white bib the
+    # contaminated pixels are the same brightness as the fur beside them and only
+    # a cyan cast gives them away, so a luminance test alone leaves a green
+    # fringe down every white-patched cat.
+    cyan = (rgb[:, :, 1] + rgb[:, :, 2]) / 2 - rgb[:, :, 0]
+    trust = (arr[:, :, 3] >= 250) & ~(band & ((lum > ref + 22) | (cyan > 10)))
     if trust.any():
         _, idx = ndimage.distance_transform_edt(~trust, return_indices=True)
         fix = vis & ~trust
         arr[:, :, :3][fix] = arr[:, :, :3][idx[0][fix], idx[1][fix]]
 
     R, G, B, A = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2], arr[:, :, 3]
-    # Restrict despill to the silhouette rim.  A blue British Shorthair is
-    # genuinely cooler than red in its interior; a whole-body G/B cap would
-    # silently turn a correct blue coat into neutral grey.
-    edge = vis & ~ndimage.binary_erosion(vis, np.ones((5, 5)))
+    # Despill the rim, scaled to the image. A fixed 5x5 erosion is about two
+    # pixels, which at 768 leaves a green fringe down every white-patched cat
+    # because the contamination reaches further in. The cap only fires where
+    # green and blue genuinely exceed red by more than 8, which measurement
+    # shows never happens inside a coat -- including a blue one, whose interior
+    # is close to neutral -- so widening the band does not risk neutralising it.
+    k = max(5, int(round(vis.shape[0] * 0.03)) | 1)
+    edge = vis & ~ndimage.binary_erosion(vis, np.ones((k, k)))
     cap = R + 8; f = edge & (((G + B) / 2) > cap)
     G[f] = np.minimum(G[f], cap[f]); B[f] = np.minimum(B[f], cap[f])
     im = Image.fromarray(arr.round().clip(0, 255).astype(np.uint8), 'RGBA')
