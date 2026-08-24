@@ -32,6 +32,12 @@ const HAVE = new Set(["yoshi","blue","blue-white-01","blue-white-02","blue-white
 const NEAREST = { red: "red", cinnamon: "cinnamon", fawn: "fawn", black: "black",
                   blue: "blue", lilac: "lilac", cream: "cream", chocolate: "chocolate" };
 
+/* Where a base colour has no solid artwork, fall back to its nearest relative
+   rather than to blue. Red is the live case: red-and-white exists but solid red
+   does not, and Uccelini von Flöthbach is "Rot" with no white — rendering him
+   blue is a different colour family, where cream is at least the right one. */
+const IF_MISSING = { red: "cream", fawn: "cream", cinnamon: "chocolate" };
+
 function pick(node){
   if (!node) return "blue";
   if (node === D.root) return "yoshi";
@@ -59,7 +65,9 @@ function pick(node){
     for (const k of [`${base}-white-${white}`, `${base}-white-03`])
       if (HAVE.has(k)) return k;
   }
-  return HAVE.has(base) ? base : "blue";
+  if (HAVE.has(base)) return base;
+  const alt = IF_MISSING[base];
+  return alt && HAVE.has(alt) ? alt : "blue";
 }
 
 function imageFor(node, className){
