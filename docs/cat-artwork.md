@@ -60,6 +60,31 @@ matching `BLH p 03`. Her crop keeps more chest than the others (80% rather than
 60%) so the ruff actually reads — at the standard crop a longhair looks
 shorthaired.
 
+## The pipeline
+
+`scripts/build_cat_busts.py` is the whole thing, run against the flat-cyan
+sources (which live outside this repo). In order: chroma key, strip any stroked
+outline, open-and-keep-the-largest-blob, harden the interior, fill small holes,
+recover edge colour, despill, crop, fade, frame, export.
+
+Four of those steps exist because of specific failures, all found by measuring
+rather than by looking:
+
+- **Open before keeping the largest blob.** Plain component labelling is not
+  enough. One batch carried a full-width strip along the top of the frame that
+  *touched the ears*, so it counted as part of the cat and rode through onto the
+  site as a white line across four portraits.
+- **Harden the interior.** The key's soft ramp let pale fur near the threshold
+  come out part-transparent, so the background showed through the body. Only the
+  outermost pixels should carry partial alpha.
+- **Size the frame from the head, never from a fixed fraction of the body.** Head
+  width targets 0.67 of the frame (0.55 for Grace, so her ruff reads). A fixed
+  crop fraction cannot hold scale steady across sources with different body
+  proportions, and framing on the widest point instead sliced sixteen cats' 
+  shoulders off at a hard vertical edge.
+- **Fade the frame edges, do not cut them.** Any body still reaching the edge
+  dissolves, ramped in vertically so it never touches the head.
+
 ## Two more repairs the pipeline does
 
 Later batches needed two steps beyond the key and despill, both kept because they
@@ -73,6 +98,21 @@ cost nothing when there is nothing to fix:
   round the cat, opaque, so no key touches it. Dark neutral pixels sitting
   against the backdrop are cut. Safe here because no cat in the set is black at
   the silhouette — revisit this if one ever is.
+
+## Auditing
+
+Check the mattes by measurement, not by eye and not by HTTP status. Four numbers
+catch everything that has gone wrong so far, per asset:
+
+| Measure | How | Fail at |
+|---|---|---|
+| Body clipped by the frame | opaque pixels on column 0 and column −1 | > 40 |
+| Debris | total area of every connected blob but the largest | > 200 px |
+| Halo | mean rim brightness minus mean brightness just inside | > 14 |
+| Head scale | head width as a share of frame width | outside 0.58–0.80 |
+
+Before the audit that produced this section: worst clip 418, worst debris 4,844
+px, worst halo 28.9. After: 5, 10, 10.8, with nothing failing.
 
 Earlier states are in git history: the original full-body cutouts at `4febd11`,
 the first bust crop at `16adfc0`.
