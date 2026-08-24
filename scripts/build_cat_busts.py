@@ -3,7 +3,18 @@ from PIL import Image, ImageFilter
 import numpy as np, os, glob
 from scipy import ndimage
 
-KEY = np.array([58.3, 189.8, 209.8], np.float32)   # measured off the flat backdrop
+KEY = np.array([58.3, 189.8, 209.8], np.float32)   # fallback; measure_key() prefers the real one
+
+def measure_key(arr):
+    """Read the backdrop colour off the corners rather than trusting a constant.
+       Different batches have shipped different cyans -- 58,190,210 and 59,219,228
+       so far -- and a key tuned to the wrong one eats fur or leaves backdrop."""
+    h, w = arr.shape[:2]; c = max(8, min(h, w) // 20)
+    patch = np.concatenate([arr[:c, :c, :3].reshape(-1, 3), arr[:c, -c:, :3].reshape(-1, 3),
+                            arr[-c:, :c, :3].reshape(-1, 3), arr[-c:, -c:, :3].reshape(-1, 3)])
+    patch = patch[patch.sum(1) > 30]                      # ignore zeroed transparent corners
+    if len(patch) < 100 or patch.std(0).mean() > 12: return KEY
+    return patch.mean(0).astype(np.float32)
 LO, HI = 60.0, 140.0                               # fur sits >=150 away; backdrop std is 6
 # Target head width as a share of the frame. Driving the crop from the head
 # rather than from a fixed fraction of the body is what keeps every portrait at
@@ -13,7 +24,7 @@ HEAD_OVERRIDE = {'grace-dominica-blh': 0.55}      # a longhair needs her ruff to
 
 def build(arr, name, key_it):
     if key_it:
-        d = np.linalg.norm(arr[:, :, :3] - KEY, axis=2)
+        d = np.linalg.norm(arr[:, :, :3] - measure_key(arr), axis=2)
         arr[:, :, 3] *= np.clip((d - LO) / (HI - LO), 0, 1)
 
     rgb = arr[:, :, :3]; mx = rgb.max(2); mn = rgb.min(2)
@@ -93,13 +104,19 @@ def build(arr, name, key_it):
     sx, sy = max(0, x0), max(0, y0b); dx, dy = max(0, -x0), max(0, -y0b)
     w = min(A2.shape[1] - sx, side - dx); h = min(H - sy, side - dy)
     sq[dy:dy + h, dx:dx + w] = A2[sy:sy + h, sx:sx + w]
-    out = Image.fromarray(sq.round().clip(0, 255).astype(np.uint8), 'RGBA').resize((512, 512), Image.LANCZOS)
-
-    # These sources carry only ~350px of real detail in a 512px file, and a phone
-    # renders the card portrait near 900px, so everything upscales. A light
-    # unsharp on colour only — never on alpha, which would ring along the
-    # silhouette — buys back some apparent crispness. It is a mitigation, not a
-    # fix: the fix is sources rendered larger than 512.
+    # Both of these follow the source rather than being fixed. `side` is how many
+    # real pixels the crop actually contains: ~350 from the old 512 renders, ~1190
+    # from a genuine high-resolution one.
+    #
+    #  - Store 768 only when there is detail to keep. Storing 768 of mush measured
+    #    no better than 512 and cost three times the bytes.
+    #  - Sharpen only when there is not. Unsharp exists to paper over an upscale;
+    #    on a real source it just looks crunchy.
+    rich = side >= 700
+    out = Image.fromarray(sq.round().clip(0, 255).astype(np.uint8), 'RGBA')\
+               .resize((768, 768) if rich else (512, 512), Image.LANCZOS)
+    if rich:
+        return out
     ch = out.split()
     rgb = Image.merge('RGB', ch[:3]).filter(ImageFilter.UnsharpMask(radius=1.1, percent=115, threshold=2))
     return Image.merge('RGBA', (*rgb.split(), ch[3]))
