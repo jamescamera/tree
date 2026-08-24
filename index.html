@@ -107,10 +107,13 @@ h1 span{color:var(--gold);display:block}
 /* ---------- the cat card: portrait first ---------- */
 .card{width:100%;background:var(--ink-3);border:1px solid var(--edge);border-radius:18px;padding:14px;
  display:flex;flex-direction:column;gap:12px;align-items:stretch;cursor:pointer;text-align:left;color:var(--text);
- box-shadow:var(--raise);
+ box-shadow:var(--raise);position:relative;overflow:hidden;
  transition:opacity .3s ease,transform .28s cubic-bezier(.2,.8,.3,1),border-color .28s ease,box-shadow .28s ease}
+.card::before{content:'';position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+ opacity:0;transition:opacity .28s ease}
 .card:hover{transform:translateY(-4px);border-color:var(--gold);
  box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 26px 44px -22px rgba(0,0,0,1),0 0 40px -14px rgba(217,184,96,.45)}
+.card:hover::before{opacity:1}
 .card.pop{animation:pop .55s cubic-bezier(.2,.8,.3,1)}
 @keyframes pop{0%{transform:translateY(0) scale(1)}45%{transform:translateY(-6px) scale(1.03)}100%{transform:none}}
 /* the portrait frame: the assets are square busts on transparency, so contain
@@ -126,6 +129,9 @@ h1 span{color:var(--gold);display:block}
  object-fit:contain;object-position:center bottom;
  transition:transform .5s cubic-bezier(.2,.8,.3,1)}
 .cface svg{padding:6% 0 2%}
+.card-stamp{position:absolute;z-index:4;top:9px;right:9px;border:1px solid rgba(255,255,255,.14);border-radius:99px;
+ background:rgba(20,17,27,.56);backdrop-filter:blur(8px);padding:4px 8px;font-family:'IBM Plex Mono',monospace;
+ font-size:8px;letter-spacing:.16em;color:var(--text);text-transform:uppercase;box-shadow:0 5px 14px -8px #000}
 .card:hover .cface img{transform:scale(1.05)}
 .card:hover .cface::after{opacity:.55}
 .card:focus-visible{transform:translateY(-3px);border-color:var(--gold);
@@ -297,6 +303,15 @@ body.locked .gate{display:flex}
 .found li b{color:var(--text)}
 .src{margin:11px 0 0;font-size:11.5px;color:var(--faint);line-height:1.5}
 .src a{color:var(--gold)}
+.research{margin-top:18px;padding:15px;border:1px solid rgba(217,184,96,.42);border-radius:16px;
+ background:linear-gradient(135deg,rgba(217,184,96,.13),rgba(183,166,188,.08));position:relative;overflow:hidden}
+.research::after{content:'↗';position:absolute;right:14px;top:9px;color:rgba(217,184,96,.24);font:900 42px/1 Fraunces,Georgia,serif}
+.research-kicker{margin:0 0 5px;font:400 8.5px/1.4 'IBM Plex Mono',monospace;letter-spacing:.21em;text-transform:uppercase;color:var(--gold)}
+.research h4{margin:0 0 9px;font:700 16px/1.1 Fraunces,Georgia,serif;letter-spacing:-.02em}
+.research .found{position:relative;z-index:1}.research .src{margin-top:10px}
+.source-link{position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:8px 12px;
+ border:1px solid var(--gold);border-radius:99px;background:rgba(20,17,27,.6);color:var(--gold);font-size:11px;font-weight:700;
+ text-decoration:none;transition:background .2s,transform .2s}.source-link:hover{background:var(--gold);color:#171208;transform:translateY(-1px)}
 
 /* ---------- the cat as a gallery plate ---------- */
 #cat{position:fixed;right:18px;bottom:18px;z-index:80;width:min(390px,calc(100vw - 36px));
@@ -837,7 +852,8 @@ function card(entry,gen){
   const rel = gen===0 ? "The boy himself" : REL[gen-1][pos] + (gen>1?` · ${side} side`:"");
   const b=document.createElement("button");
   b.type="button";b.className="card"+(gen?"":" root");b.dataset.cols=node.cols.join(" ");
-  b.innerHTML=`<span class="cface">${face(node)}</span>`+`<div><span class="rel">${rel}${node.found?' · researched':''}</span>
+  const stamp=gen===0?"home":`gen ${gen}`;
+  b.innerHTML=`<span class="cface"><span class="card-stamp">${stamp}</span>${face(node)}</span>`+`<div><span class="rel">${rel}${node.found?' · researched':''}</span>
     <span class="name">${node.title?`<span class="title">${node.title}</span>`:""}${node.name}</span>
     <div class="desc">${says(node)}</div>
     <div class="code">${node.code}</div></div>`;
@@ -935,6 +951,7 @@ const FOUND={
  "Bonaparte vom Kupferstich":{
    src:"Kotoffski pedigree record, corroborated by FDkat and a German cattery page",
    url:"https://cattery-vom-wolfswald.jimdoweb.com/youngster/",
+   photo:true,
    facts:["Grand International Champion — his GR.I.CH confirmed.",
     "Fawn <b>ticked</b>, which the certificate doesn't record — it only says fawn.",
     "Born 1 September 2010. Imported from Germany, bred by Christiane Traut at the vom Kupferstich cattery.",
@@ -1077,10 +1094,11 @@ function showCat(node,rel,gen){
   const f=FOUND[node.name]||(bits.length?{facts:bits,src:"Bonaparte's pedigree, via kotoffski.ru",
     url:"http://kotoffski.ru/wp-content/uploads/Pedigree-Bonaparte.jpg"}:null);
   document.getElementById("catfound").innerHTML=f
-    ? `<p class="log-h" style="margin:15px 0 6px">Turned up online</p>
+    ? `<section class="research"><p class="research-kicker">Found beyond the certificate</p>
+       <h4>Real-world record</h4>
        <ul class="found">${f.facts.map(x=>`<li>${x}</li>`).join("")}</ul>
-       <p class="src">From ${f.src} — <a href="${f.url}" target="_blank" rel="noopener">see it</a>.
-        Not on Yoshi's certificate, so treat it as a lead rather than gospel.</p>` : "";
+       <p class="src">Source: ${f.src}. It is an external research lead, not part of Yoshi’s certificate.</p>
+       <a class="source-link" href="${f.url}" target="_blank" rel="noopener">${f.photo?"View original photo ↗":"Open the original record ↗"}</a></section>` : "";
 
   catEl.classList.add("show");
   bubble.classList.remove("show");
