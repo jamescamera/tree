@@ -1,5 +1,5 @@
 """Turn flat-cyan cat renders into the site's bust portraits."""
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np, os, glob
 from scipy import ndimage
 
@@ -93,7 +93,16 @@ def build(arr, name, key_it):
     sx, sy = max(0, x0), max(0, y0b); dx, dy = max(0, -x0), max(0, -y0b)
     w = min(A2.shape[1] - sx, side - dx); h = min(H - sy, side - dy)
     sq[dy:dy + h, dx:dx + w] = A2[sy:sy + h, sx:sx + w]
-    return Image.fromarray(sq.round().clip(0, 255).astype(np.uint8), 'RGBA').resize((512, 512), Image.LANCZOS)
+    out = Image.fromarray(sq.round().clip(0, 255).astype(np.uint8), 'RGBA').resize((512, 512), Image.LANCZOS)
+
+    # These sources carry only ~350px of real detail in a 512px file, and a phone
+    # renders the card portrait near 900px, so everything upscales. A light
+    # unsharp on colour only — never on alpha, which would ring along the
+    # silhouette — buys back some apparent crispness. It is a mitigation, not a
+    # fix: the fix is sources rendered larger than 512.
+    ch = out.split()
+    rgb = Image.merge('RGB', ch[:3]).filter(ImageFilter.UnsharpMask(radius=1.1, percent=115, threshold=2))
+    return Image.merge('RGBA', (*rgb.split(), ch[3]))
 
 if __name__ == '__main__':
     REF = {'lilac': 'audit/reference/lilac_final.png', 'cream': 'audit/reference/cream_final.png',
