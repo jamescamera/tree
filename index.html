@@ -367,7 +367,10 @@ img.bigcat{object-fit:contain;object-position:center bottom}
  animation:sheen 6s ease-in-out infinite}
 @keyframes sheen{0%,72%{transform:translateX(-70%)}100%{transform:translateX(70%)}}
 
-#catflip{margin:12px auto 0;display:block;background:var(--ink-3);color:var(--text);border-color:var(--edge-2)}
+#cat-actions{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:12px auto 0}
+#catflip{display:block;background:var(--ink-3);color:var(--text);border-color:var(--edge-2)}
+#catsource{display:inline-flex;align-items:center;text-decoration:none;background:var(--gold-wash);border-color:var(--gold-deep);color:var(--gold)}
+#catsource[hidden]{display:none}
 #cattitle{margin:0 0 12px;font-size:11px;color:var(--gold);font-weight:400;line-height:1.5;
  font-family:'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
 #cattitle:empty{display:none}
@@ -631,7 +634,8 @@ try{if(localStorage.getItem("yoshi.key")==="6514ab2c2edb4fdbc54e268085913b6cf5f1
       </div></div>
     </div>
   </div>
-  <button class="pill" id="catflip" aria-pressed="false">Turn it over ↻</button>
+  <div id="cat-actions"><button class="pill" id="catflip" aria-pressed="false">Turn it over ↻</button>
+  <a class="pill" id="catsource" target="_blank" rel="noopener" hidden></a></div>
 </aside>
 
 <div id="bubble" role="status" aria-live="polite"></div>
@@ -1091,8 +1095,11 @@ function showCat(node,rel,gen){
   const bits=[];
   if(node.health)bits.push(`Screened <b>${node.health}</b> — polycystic kidney disease and the heart condition British Shorthairs are watched for.`);
   if(node.found)bits.push(`Not on Yoshi's certificate. This comes off <b>Bonaparte vom Kupferstich's</b> own German pedigree, published by the Russian cattery that stood him at stud.`);
-  const f=FOUND[node.name]||(bits.length?{facts:bits,src:"Bonaparte's pedigree, via kotoffski.ru",
-    url:"http://kotoffski.ru/wp-content/uploads/Pedigree-Bonaparte.jpg"}:null);
+  const f=FOUND[node.name]||(bits.length?{facts:bits,src:"Bonaparte’s public pedigree record (FDkat)",
+    url:"https://fdkat.dk/perusnaytto_kissa.aspx?id=85268"}:null);
+  const source=document.getElementById("catsource");
+  source.hidden=!f;
+  if(f){source.href=f.url;source.textContent=f.photo?"Original photo ↗":"Original record ↗";}
   document.getElementById("catfound").innerHTML=f
     ? `<section class="research"><p class="research-kicker">Found beyond the certificate</p>
        <h4>Real-world record</h4>
