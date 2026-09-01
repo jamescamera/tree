@@ -4,7 +4,7 @@
    "breed": "British Shorthair",
    "gender": "male",
    "id": "PET-d551ce5e-423a-4974-8152-b80e99f9224d",
-   "latest_kg": 4.9,
+   "latest_kg": 4.94,
    "readings": [
     {
      "kg": 4.82,
@@ -95,16 +95,21 @@
      "kg": 4.9,
      "raw": 10.8,
      "t": "2026-08-31T07:20:35+00:00"
+    },
+    {
+     "kg": 4.94,
+     "raw": 10.9,
+     "t": "2026-09-01T09:22:43+00:00"
     }
    ],
    "unit": "lb",
    "watch": {
-    "days": 14,
+    "days": 15,
     "days_needed": 21,
-    "readings": 18,
+    "readings": 19,
     "status": "learning"
    }
   }
  },
- "updated": "2026-08-31T13:47:48.271334+00:00"
+ "updated": "2026-09-01T11:38:26.236726+00:00"
 }
